@@ -41,7 +41,13 @@
       "Bash(source /opt/ros/jazzy/setup.bash && ros2 lifecycle set /slam_toolbox configure && sleep 2 && ros2 lifecycle set /slam_toolbox activate && echo \"SLAM active\")",
       "Bash(sleep 10 && source /opt/ros/jazzy/setup.bash && ros2 node list 2>/dev/null)",
       "Bash(source /opt/ros/jazzy/setup.bash && ros2 topic echo /scan --once 2>/dev/null | grep -A 20 \"^ranges:\")",
-      "Bash(claude doctor:*)"
+      "Bash(claude doctor:*)",
+      "Bash(dpkg -l)",
+      "Bash(which colcon:*)",
+      "Bash(source /opt/ros/jazzy/setup.bash && source /home/rraina/swarm_ws/install/setup.bash && ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist \"{linear: {x: 0.0}, angular: {z: 0.0}}\" 2>&1)",
+      "Bash(source /opt/ros/jazzy/setup.bash && source /home/rraina/swarm_ws/install/setup.bash && gz topic -l 2>/dev/null | grep -E \"scan|lidar|cloud|points\")",
+      "Bash(ps -p 6420 -o pid,cmd)",
+      "Bash(source /opt/ros/jazzy/setup.bash && source /home/rraina/swarm_ws/install/setup.bash && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release 2>&1 | tail -5)"
     ]
   }
 }

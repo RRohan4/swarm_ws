@@ -1,0 +1,24 @@
+running develop
+running egg_info
+creating swarm_exploration.egg-info
+writing swarm_exploration.egg-info/PKG-INFO
+writing dependency_links to swarm_exploration.egg-info/dependency_links.txt
+writing requirements to swarm_exploration.egg-info/requires.txt
+writing top-level names to swarm_exploration.egg-info/top_level.txt
+writing manifest file 'swarm_exploration.egg-info/SOURCES.txt'
+reading manifest file 'swarm_exploration.egg-info/SOURCES.txt'
+writing manifest file 'swarm_exploration.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/rraina/swarm_ws/install/swarm_exploration/lib/python3.12/site-packages/swarm-exploration.egg-link (link to .)
+
+Installed /home/rraina/swarm_ws/build/swarm_exploration
+running symlink_data
+creating /home/rraina/swarm_ws/install/swarm_exploration/share/ament_index
+creating /home/rraina/swarm_ws/install/swarm_exploration/share/ament_index/resource_index
+creating /home/rraina/swarm_ws/install/swarm_exploration/share/ament_index/resource_index/packages
+symbolically linking /home/rraina/swarm_ws/build/swarm_exploration/resource/swarm_exploration -> /home/rraina/swarm_ws/install/swarm_exploration/share/ament_index/resource_index/packages
+symbolically linking /home/rraina/swarm_ws/build/swarm_exploration/package.xml -> /home/rraina/swarm_ws/install/swarm_exploration/share/swarm_exploration
+creating /home/rraina/swarm_ws/install/swarm_exploration/share/swarm_exploration/launch
+symbolically linking /home/rraina/swarm_ws/build/swarm_exploration/launch/single_robot.launch.py -> /home/rraina/swarm_ws/install/swarm_exploration/share/swarm_exploration/launch
+creating /home/rraina/swarm_ws/install/swarm_exploration/share/swarm_exploration/worlds
+symbolically linking /home/rraina/swarm_ws/build/swarm_exploration/worlds/robot_world.sdf -> /home/rraina/swarm_ws/install/swarm_exploration/share/swarm_exploration/worlds

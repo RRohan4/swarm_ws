@@ -31,10 +31,10 @@
       <pose>3 0 0.5 0 0 0</pose>
       <link name="link">
         <collision name="collision">
-          <geometry><box><size>0.2 4 1</size></box></geometry>
+          <geometry><box><size>0.2 6 1</size></box></geometry>
         </collision>
         <visual name="visual">
-          <geometry><box><size>0.2 4 1</size></box></geometry>
+          <geometry><box><size>0.2 6 1</size></box></geometry>
         </visual>
       </link>
     </model>
@@ -44,10 +44,10 @@
       <pose>-3 0 0.5 0 0 0</pose>
       <link name="link">
         <collision name="collision">
-          <geometry><box><size>0.2 4 1</size></box></geometry>
+          <geometry><box><size>0.2 6 1</size></box></geometry>
         </collision>
         <visual name="visual">
-          <geometry><box><size>0.2 4 1</size></box></geometry>
+          <geometry><box><size>0.2 6 1</size></box></geometry>
         </visual>
       </link>
     </model>
@@ -57,10 +57,10 @@
       <pose>0 3 0.5 0 0 0</pose>
       <link name="link">
         <collision name="collision">
-          <geometry><box><size>4 0.2 1</size></box></geometry>
+          <geometry><box><size>6 0.2 1</size></box></geometry>
         </collision>
         <visual name="visual">
-          <geometry><box><size>4 0.2 1</size></box></geometry>
+          <geometry><box><size>6 0.2 1</size></box></geometry>
         </visual>
       </link>
     </model>
@@ -70,10 +70,10 @@
       <pose>0 -3 0.5 0 0 0</pose>
       <link name="link">
         <collision name="collision">
-          <geometry><box><size>4 0.2 1</size></box></geometry>
+          <geometry><box><size>6 0.2 1</size></box></geometry>
         </collision>
         <visual name="visual">
-          <geometry><box><size>4 0.2 1</size></box></geometry>
+          <geometry><box><size>6 0.2 1</size></box></geometry>
         </visual>
       </link>
     </model>

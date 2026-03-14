@@ -1,0 +1,15 @@
+[0.675s] Invoking command in '/home/rraina/swarm_ws/build/swarm_exploration': PYTHONPATH=/home/rraina/swarm_ws/build/swarm_exploration/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rraina/swarm_ws/install/swarm_exploration/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/rraina/swarm_ws/build/swarm_exploration/build --no-deps symlink_data
+[0.928s] running develop
+[1.075s] running egg_info
+[1.090s] writing swarm_exploration.egg-info/PKG-INFO
+[1.091s] writing dependency_links to swarm_exploration.egg-info/dependency_links.txt
+[1.091s] writing requirements to swarm_exploration.egg-info/requires.txt
+[1.091s] writing top-level names to swarm_exploration.egg-info/top_level.txt
+[1.108s] reading manifest file 'swarm_exploration.egg-info/SOURCES.txt'
+[1.111s] writing manifest file 'swarm_exploration.egg-info/SOURCES.txt'
+[1.124s] running build_ext
+[1.144s] Creating /home/rraina/swarm_ws/install/swarm_exploration/lib/python3.12/site-packages/swarm-exploration.egg-link (link to .)
+[1.145s] 
+[1.145s] Installed /home/rraina/swarm_ws/build/swarm_exploration
+[1.145s] running symlink_data
+[1.172s] Invoked command in '/home/rraina/swarm_ws/build/swarm_exploration' returned '0': PYTHONPATH=/home/rraina/swarm_ws/build/swarm_exploration/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rraina/swarm_ws/install/swarm_exploration/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/rraina/swarm_ws/build/swarm_exploration/build --no-deps symlink_data
