@@ -1,6 +1,22 @@
 .claude
-build
-__pycache__
-out
 CLAUDE.md
+
+# Build and generated outputs
+build/
+install/
+log/
+out/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Colcon and local tooling state
+.colcon/
+
+# Generated graph/frame artifacts
+frames_*.gv
+frames_*.pdf
 
