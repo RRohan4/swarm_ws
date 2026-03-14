@@ -3,15 +3,22 @@
 ## Package Structure
 
 ```
-swarm_ws/src/
-├── swarm_msgs/          # Custom ROS interfaces only (no executables)
-├── swarm_radio/         # Mock radio "god" node — singleton, global namespace
-├── swarm_perception/    # Per-robot: LIDAR processing, pseudo-3D world model
-├── swarm_comms/         # Per-robot: TX/RX queuing, FEC, ARQ, heartbeat, peer registry
-├── swarm_slam/          # Per-robot: slam_toolbox wrapper, map fragment I/O, peer map merge
-├── swarm_exploration/   # Per-robot: NBV candidate sampling, info-gain scoring, submodular claim consensus, role FSM
-├── swarm_coordinator/   # Per-robot: distributed coordinator, no central authority
-└── swarm_bringup/       # Maze SDF, multi-robot launch, nav2/SLAM param YAMLs
+swarm_ws/
+├── docker/
+│   ├── Dockerfile.base         # ROS 2 Jazzy + Gazebo + nav2 + slam_toolbox base layer
+│   ├── Dockerfile.sim          # extends base: Gazebo headless + world assets
+│   ├── Dockerfile.robot        # extends base: per-robot node stack
+│   ├── Dockerfile.radio        # extends base: radio god node only
+│   └── compose.yaml            # Docker Compose orchestration (sim + radio + N robots)
+└── src/
+    ├── swarm_msgs/          # Custom ROS interfaces only (no executables)
+    ├── swarm_radio/         # Mock radio "god" node — singleton, global namespace
+    ├── swarm_perception/    # Per-robot: LIDAR processing, pseudo-3D world model
+    ├── swarm_comms/         # Per-robot: TX/RX queuing, FEC, ARQ, heartbeat, peer registry
+    ├── swarm_slam/          # Per-robot: slam_toolbox wrapper, map fragment I/O, peer map merge
+    ├── swarm_exploration/   # Per-robot: NBV candidate sampling, info-gain scoring, submodular claim consensus, role FSM
+    ├── swarm_coordinator/   # Per-robot: distributed coordinator, no central authority
+    └── swarm_bringup/       # Maze SDF, launch files, nav2/SLAM param YAMLs
 ```
 
 Existing `src/swarm_exploration/` launch files → folded into `swarm_bringup/`.
@@ -320,30 +327,30 @@ config/
 ## Node Graph Summary
 
 ```
-                    ┌─────────────────────┐
+                    ┌──────────────────────┐
                     │   radio_god_node     │  (global ns)
                     │  /radio/tx  →  route │
                     │  → /robot_N/radio/rx │
-                    └──────────┬──────────┘
+                    └──────────┬───────────┘
                                │ per robot
           ┌────────────────────┼────────────────────┐
           │                    │                    │
    /robot_0/...          /robot_1/...         /robot_2/...
           │
    ┌──────┴────────────────────────────────────┐
-   │  perception_node                           │
+   │  perception_node                          │
    │    /scan → /obstacle_map, /elevation_map  │
    ├───────────────────────────────────────────┤
    │  slam_node                                │
    │    /scan + /odom + rx → /map, /merged_map │
    ├───────────────────────────────────────────┤
    │  comms_node                               │
-   │    /radio/rx ↔ /radio/tx                 │
+   │    /radio/rx ↔ /radio/tx                  │
    │    → /comms/rx_dispatch/*                 │
    ├───────────────────────────────────────────┤
    │  exploration_node  (NBV planner)          │
    │    /merged_map → /exploration_target      │
-   │    ↔ /comms/tx_request (ViewpointClaim)  │
+   │    ↔ /comms/tx_request (ViewpointClaim)   │
    ├───────────────────────────────────────────┤
    │  coordinator_node                         │
    │    peer_status/discovery → role_assignment│
@@ -355,10 +362,99 @@ config/
 
 ---
 
+## Docker / Containerization
+
+### Files
+
+```
+swarm_ws/
+├── Dockerfile          # single image: all nodes, built once
+└── compose.yaml        # one service per role; docker compose build && up
+```
+
+### Dockerfile
+
+Single multi-stage build. All packages compiled once into one image; the entrypoint is overridden per service in `compose.yaml`.
+
+```dockerfile
+FROM osrf/ros:jazzy-desktop AS base
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-jazzy-nav2-bringup ros-jazzy-slam-toolbox \
+    ros-jazzy-ros-gz-bridge gz-harmonic \
+    python3-pip && rm -rf /var/lib/apt/lists/*
+RUN pip3 install --no-cache-dir numpy scipy crcmod reedsolo
+
+WORKDIR /ws
+COPY src/ src/
+RUN . /opt/ros/jazzy/setup.sh && colcon build --symlink-install
+```
+
+### compose.yaml
+
+```yaml
+services:
+
+  sim:
+    build: .
+    network_mode: host
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_bringup gazebo.launch.py"
+
+  radio:
+    build: .
+    network_mode: host
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_bringup radio_god.launch.py"
+    depends_on: [sim]
+
+  robot_0:
+    build: .
+    network_mode: host
+    environment: {ROBOT_ID: robot_0, ROBOT_INIT_X: "0.0", ROBOT_INIT_Y: "0.0"}
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_bringup robot_stack.launch.py
+               robot_id:=$ROBOT_ID x:=$ROBOT_INIT_X y:=$ROBOT_INIT_Y"
+    depends_on: [sim, radio]
+
+  robot_1:
+    build: .
+    network_mode: host
+    environment: {ROBOT_ID: robot_1, ROBOT_INIT_X: "1.0", ROBOT_INIT_Y: "0.0"}
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_bringup robot_stack.launch.py
+               robot_id:=$ROBOT_ID x:=$ROBOT_INIT_X y:=$ROBOT_INIT_Y"
+    depends_on: [sim, radio]
+
+  robot_2:
+    build: .
+    network_mode: host
+    environment: {ROBOT_ID: robot_2, ROBOT_INIT_X: "2.0", ROBOT_INIT_Y: "0.0"}
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_bringup robot_stack.launch.py
+               robot_id:=$ROBOT_ID x:=$ROBOT_INIT_X y:=$ROBOT_INIT_Y"
+    depends_on: [sim, radio]
+```
+
+`network_mode: host` gives all containers shared host networking so ROS 2 DDS multicast discovery works with no extra configuration.
+
+### Adding Robots
+
+Copy any `robot_N` block in `compose.yaml`, increment the ID, and set new initial coordinates. No rebuild needed — it's the same image.
+
+---
+
 ## Verification
 
 ```bash
-ros2 launch swarm_bringup swarm.launch.py num_robots:=3 && \
-ros2 topic echo /radio/channel_state --once && \
+docker compose build
+docker compose up
+
+# from host, verify radio god routing and all robot nodes are alive
+ros2 topic echo /radio/channel_state --once
 ros2 node list | grep -E "(radio_god|robot_[0-2]/(perception|comms|slam|exploration|coordinator))"
 ```
