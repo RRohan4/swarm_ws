@@ -4,7 +4,7 @@
   <name>swarm_exploration</name>
   <version>0.0.1</version>
   <description>2-robot swarm exploration with Gazebo Harmonic, SLAM toolbox, and frontier detection</description>
-  <maintainer email="rraina@todo.todo">rraina</maintainer>
+  <maintainer email="rraina@todo.todo">Rohan Raina</maintainer>
   <license>Apache-2.0</license>
 
   <exec_depend>ros_gz_bridge</exec_depend>

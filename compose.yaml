@@ -1,0 +1,56 @@
+services:
+
+  # ── Single-robot sim (current working setup) ────────────────────────────────
+  # Runs Gazebo headless + SLAM Toolbox + Foxglove bridge on ws://localhost:8765
+  sim:
+    build: .
+    network_mode: host
+    environment:
+      # X11 forwarding for optional GUI tools; set DISPLAY on host before running
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_exploration single_robot.launch.py"
+
+  # ── Multi-robot services (uncomment when swarm packages are implemented) ────
+  #
+  # radio:
+  #   build: .
+  #   network_mode: host
+  #   command: >
+  #     bash -c ". /ws/install/setup.sh &&
+  #              ros2 launch swarm_bringup radio_god.launch.py"
+  #   depends_on: [sim]
+  #
+  # robot_0:
+  #   build: .
+  #   network_mode: host
+  #   environment: {ROBOT_ID: robot_0, ROBOT_INIT_X: "0.0", ROBOT_INIT_Y: "0.0"}
+  #   command: >
+  #     bash -c ". /ws/install/setup.sh &&
+  #              ros2 launch swarm_bringup robot_stack.launch.py
+  #              robot_id:=$ROBOT_ID x:=$ROBOT_INIT_X y:=$ROBOT_INIT_Y"
+  #   depends_on: [sim, radio]
+  #
+  # robot_1:
+  #   build: .
+  #   network_mode: host
+  #   environment: {ROBOT_ID: robot_1, ROBOT_INIT_X: "1.0", ROBOT_INIT_Y: "0.0"}
+  #   command: >
+  #     bash -c ". /ws/install/setup.sh &&
+  #              ros2 launch swarm_bringup robot_stack.launch.py
+  #              robot_id:=$ROBOT_ID x:=$ROBOT_INIT_X y:=$ROBOT_INIT_Y"
+  #   depends_on: [sim, radio]
+  #
+  # robot_2:
+  #   build: .
+  #   network_mode: host
+  #   environment: {ROBOT_ID: robot_2, ROBOT_INIT_X: "2.0", ROBOT_INIT_Y: "0.0"}
+  #   command: >
+  #     bash -c ". /ws/install/setup.sh &&
+  #              ros2 launch swarm_bringup robot_stack.launch.py
+  #              robot_id:=$ROBOT_ID x:=$ROBOT_INIT_X y:=$ROBOT_INIT_Y"
+  #   depends_on: [sim, radio]

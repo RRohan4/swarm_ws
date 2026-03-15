@@ -10,15 +10,22 @@
     <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
     <plugin filename="gz-sim-user-commands-system"  name="gz::sim::systems::UserCommands"/>
 
+    <!-- Scene: black background, moderate ambient so unlit faces aren't pure black -->
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0 0 0 1</background>
+    </scene>
+
     <!-- Lighting -->
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
       <pose>0 0 10 0 0 0</pose>
-      <diffuse>1 1 1 1</diffuse>
-      <specular>0.5 0.5 0.5 1</specular>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
     </light>
 
-    <!-- Ground -->
+    <!-- Ground: medium gray -->
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
@@ -28,8 +35,8 @@
         <visual name="visual">
           <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
           <material>
-            <ambient>0.8 0.8 0.8 1</ambient>
-            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
           </material>
         </visual>
       </link>
@@ -53,8 +60,8 @@
         <visual name="visual">
           <geometry><box><size>0.2 10.4 1</size></box></geometry>
           <material>
-            <ambient>0.2 0.4 0.7 1</ambient>
-            <diffuse>0.2 0.4 0.7 1</diffuse>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
       </link>
@@ -71,8 +78,8 @@
         <visual name="visual">
           <geometry><box><size>0.2 10.4 1</size></box></geometry>
           <material>
-            <ambient>0.2 0.4 0.7 1</ambient>
-            <diffuse>0.2 0.4 0.7 1</diffuse>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
       </link>
@@ -89,8 +96,8 @@
         <visual name="visual">
           <geometry><box><size>10.4 0.2 1</size></box></geometry>
           <material>
-            <ambient>0.2 0.4 0.7 1</ambient>
-            <diffuse>0.2 0.4 0.7 1</diffuse>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
       </link>
@@ -107,8 +114,8 @@
         <visual name="visual">
           <geometry><box><size>10.4 0.2 1</size></box></geometry>
           <material>
-            <ambient>0.2 0.4 0.7 1</ambient>
-            <diffuse>0.2 0.4 0.7 1</diffuse>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
           </material>
         </visual>
       </link>
@@ -125,8 +132,8 @@
         <visual name="visual">
           <geometry><box><size>0.5 0.5 0.5</size></box></geometry>
           <material>
-            <ambient>0.9 0.2 0.1 1</ambient>
-            <diffuse>0.9 0.2 0.1 1</diffuse>
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
           </material>
         </visual>
       </link>
