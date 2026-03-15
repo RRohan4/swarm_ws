@@ -16,11 +16,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-colcon-common-extensions \
     python3-pip \
     docker-ce-cli \
+    docker-buildx-plugin \
     docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/*
 
-# Python linting / type-checking
-RUN pip3 install --no-cache-dir --break-system-packages ruff mypy
+# Disable the secretservice credential helper
+RUN mkdir -p /root/.docker \
+    && echo '{"credsStore":""}' > /root/.docker/config.json
+
+# Node.js (for Prettier formatting)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python linting / type-checking / pre-commit
+RUN pip3 install --no-cache-dir --break-system-packages ruff mypy pre-commit
 
 # Auto-source ROS in every shell
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc

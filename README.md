@@ -1,103 +1,111 @@
-# Swarm Simulator Headless Gazebo + Foxglove
+# Swarm Simulator — Headless Gazebo + Foxglove
 
-This workspace includes a ROS 2 launch file that starts Gazebo in headless mode and exposes ROS topics to Foxglove.
+ROS 2 workspace for single- (and eventually multi-) robot swarm exploration. Gazebo runs headless; Foxglove provides the visualisation UI.
 
-## What this runs
+## Dev flow overview
 
-The launch file `src/swarm_exploration/launch/single_robot.launch.py` starts:
+| Step | Tool | Purpose |
+|------|------|---------|
+| Write & edit code | Dev Container | Full ROS 2 + tooling environment in VS Code |
+| Run the simulator | `docker compose` | Builds the sim image and launches the full stack |
+
+The dev container forwards the host Docker socket, so `docker compose` commands work from inside it.
+
+---
+
+## 1. Open in Dev Container
+
+### Requirements
+
+- [Docker](https://docs.docker.com/get-docker/) (Desktop or Engine)
+- [VS Code](https://code.visualstudio.com/) with the **Dev Containers** extension (`ms-vscode-remote.remote-containers`)
+
+### Steps
+
+1. Clone this repo and open the folder in VS Code.
+2. When prompted, click **Reopen in Container** — or `F1` → **Dev Containers: Reopen in Container**.
+3. VS Code builds the image from [`.devcontainer/Dockerfile.dev`](.devcontainer/Dockerfile.dev) and mounts the workspace at `/ws`.
+4. `pre-commit install` runs automatically on first open.
+
+The dev container includes ROS 2 Jazzy, `ruff`, `mypy`, `pre-commit`, and recommended VS Code extensions (Ruff, Pylance, ROS, XML, TOML, Claude Code).
+
+---
+
+## 2. Build & run the simulator
+
+From the workspace root — either on the host or from a terminal inside the dev container:
+
+```bash
+# Build the sim image (only needed after Dockerfile or dependency changes)
+docker compose build
+
+# Start the sim stack
+docker compose up
+```
+
+This starts the `sim` service which runs:
 - Gazebo Harmonic in headless/server mode
 - TurtleBot3 Waffle spawn
-- ROS <-> Gazebo topic bridges (`ros_gz_bridge`)
-- SLAM Toolbox
+- ROS ↔ Gazebo topic bridges (`ros_gz_bridge`)
+- SLAM Toolbox (lifecycle managed automatically)
 - Foxglove bridge on `ws://localhost:8765`
 
-## Prerequisites
+Stop with `Ctrl-C` or `docker compose down`.
 
-Assumes a Linux machine with:
-- ROS 2 (same distro used by your workspace)
-- Gazebo Harmonic + ROS Gazebo bridge packages
-- Workspace dependencies installed for `swarm_exploration`
+---
 
-Helpful packages used by this launch stack include:
-- `ros_gz_sim`
-- `ros_gz_bridge`
-- `slam_toolbox`
-- `foxglove_bridge`
-- `nav2_minimal_tb3_sim` (for TurtleBot3 simulation assets)
+## 3. Connect Foxglove
 
-If dependencies are missing, run from workspace root:
+Open [Foxglove](https://app.foxglove.dev/) (Desktop or web):
 
-```bash
-rosdep update
-rosdep install --from-paths src --ignore-src -r -y
-```
+1. **New connection** → **Foxglove WebSocket** → `ws://localhost:8765`
+2. Set fixed frame to `map`.
 
-## Build
+Useful topics:
 
-From workspace root (`swarm_ws`):
+| Panel | Topic |
+|-------|-------|
+| LaserScan | `/scan` |
+| PointCloud | `/depth/points` |
+| Map | `/map` |
+| Image | `/depth/image` |
 
-```bash
-colcon build --packages-select swarm_exploration
-source install/setup.bash
-```
+A pre-built dashboard layout is in [`config/foxglove/swarm_ws.json`](config/foxglove/swarm_ws.json) — import it via **File → Import layout**.
 
-## Run headless simulator for Foxglove
+---
 
-In terminal 1:
+## Pre-commit hooks
+
+Hooks run automatically before every commit. To run manually:
 
 ```bash
-source /opt/ros/$ROS_DISTRO/setup.bash
-source install/setup.bash
-ros2 launch swarm_exploration single_robot.launch.py
+pre-commit run --all-files
 ```
 
-Expected behavior:
-- Gazebo runs headless (no GUI)
-- Foxglove bridge starts on TCP port `8765`
-- SLAM lifecycle is configured and activated automatically
+| Hook | What it does |
+|------|-------------|
+| `check-json` | Validates JSON syntax |
+| `check-yaml` | Validates YAML syntax |
+| `check-toml` | Validates TOML syntax |
+| `ruff` | Python linting (auto-fix) |
+| `ruff-format` | Python formatting |
+| `trailing-whitespace` | Strips trailing spaces |
+| `end-of-file-fixer` | Ensures files end with a newline |
+| `mixed-line-ending` | Normalises line endings to LF |
+| `check-merge-conflict` | Blocks leftover merge-conflict markers |
+| `check-added-large-files` | Blocks files > 500 KB |
 
-## Connect Foxglove
-
-Use Foxglove Desktop or web app:
-1. Open a new connection.
-2. Select **Foxglove WebSocket**.
-3. Use URL: `ws://localhost:8765`.
-4. Set fixed frame to `map`.
-
-Suggested panels/topics:
-- `LaserScan`: `/scan`
-- `PointCloud`: `/scan/points`
-- `PointCloud`: `/depth/points`
-- `Map`: `/map`
-- `Image`: `/depth/image`
-
-## Optional teleop
-
-In terminal 2:
+Update hook versions:
 
 ```bash
-source /opt/ros/$ROS_DISTRO/setup.bash
-source install/setup.bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
+pre-commit autoupdate
 ```
 
-## Quick checks
-
-List active topics:
-
-```bash
-ros2 topic list
-```
-
-Confirm Foxglove bridge node:
-
-```bash
-ros2 node list | grep foxglove_bridge
-```
+---
 
 ## Troubleshooting
 
-- Port in use (`8765`): stop any process on that port, then relaunch.
-- No map updates: wait a few seconds after launch; SLAM starts with timed delays.
-- No robot movement in map: send velocity commands (teleop) so SLAM receives motion and scan updates.
-- Missing package errors: re-run `rosdep install` and rebuild.
+- **Port 8765 in use**: stop any process on that port and rerun `docker compose up`.
+- **No map updates**: SLAM starts with timed delays — wait ~15 s after the stack is up.
+- **Robot not moving in map**: send velocity commands via the Foxglove Teleop panel so SLAM receives motion and scan data.
+- **Missing ROS packages in sim image**: rebuild with `docker compose build`.

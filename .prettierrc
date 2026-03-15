@@ -1,0 +1,11 @@
+{
+  "plugins": ["@prettier/plugin-xml"],
+  "overrides": [
+    {
+      "files": ["*.xml", "*.xacro"],
+      "options": {
+        "parser": "xml"
+      }
+    }
+  ]
+}

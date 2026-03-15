@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-ros-gz-sim \
     ros-jazzy-foxglove-bridge \
     ros-jazzy-robot-state-publisher \
-    ros-jazzy-teleop-twist-keyboard \
     gz-harmonic \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*

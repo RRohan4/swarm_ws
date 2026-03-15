@@ -7,21 +7,10 @@
         "phi": 54.90892204247656,
         "thetaOffset": -167.5634645730104,
         "targetOffset": [
-          -0.2534642409182954,
-          0.394794926711708,
-          1.757013395617096e-17
+          -0.2534642409182954, 0.394794926711708, 1.757013395617096e-17
         ],
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "fovy": 45,
         "near": 0.5,
         "far": 5000
@@ -116,16 +105,8 @@
           "divisions": 10,
           "lineWidth": 1,
           "color": "#248eff",
-          "position": [
-            0,
-            0,
-            0
-          ],
-          "rotation": [
-            0,
-            0,
-            0
-          ]
+          "position": [0, 0, 0],
+          "rotation": [0, 0, 0]
         }
       },
       "publish": {
@@ -144,22 +125,9 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOffset": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,

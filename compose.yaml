@@ -1,5 +1,4 @@
 services:
-
   # ── Single-robot sim (current working setup) ────────────────────────────────
   # Runs Gazebo headless + SLAM Toolbox + Foxglove bridge on ws://localhost:8765
   sim:

@@ -34,7 +34,7 @@ def generate_launch_description():
         urdf_content = f.read()
 
     cam_link = "/world/swarm_world/model/turtlebot3_waffle/link/camera_link/sensor"
-    rgb_prefix   = cam_link + "/rgb_camera"
+    rgb_prefix = cam_link + "/rgb_camera"
     depth_prefix = cam_link + "/intel_realsense_r200_depth"
 
     return LaunchDescription(
@@ -83,18 +83,22 @@ def generate_launch_description():
                 package="ros_gz_bridge",
                 executable="parameter_bridge",
                 arguments=[
-                    rgb_prefix   + "/image@sensor_msgs/msg/Image[gz.msgs.Image",
-                    rgb_prefix   + "/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
+                    rgb_prefix + "/image@sensor_msgs/msg/Image[gz.msgs.Image",
+                    rgb_prefix
+                    + "/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
                     depth_prefix + "/depth_image@sensor_msgs/msg/Image[gz.msgs.Image",
-                    depth_prefix + "/depth_image/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
-                    depth_prefix + "/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
+                    depth_prefix + "/depth_image/points"
+                    "@sensor_msgs/msg/PointCloud2"
+                    "[gz.msgs.PointCloudPacked",
+                    depth_prefix
+                    + "/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
                 ],
                 remappings=[
-                    (rgb_prefix   + "/image",               "/camera/image_raw"),
-                    (rgb_prefix   + "/camera_info",         "/camera/camera_info"),
-                    (depth_prefix + "/depth_image",         "/depth/image"),
-                    (depth_prefix + "/depth_image/points",  "/depth/points"),
-                    (depth_prefix + "/camera_info",         "/depth/camera_info"),
+                    (rgb_prefix + "/image", "/camera/image_raw"),
+                    (rgb_prefix + "/camera_info", "/camera/camera_info"),
+                    (depth_prefix + "/depth_image", "/depth/image"),
+                    (depth_prefix + "/depth_image/points", "/depth/points"),
+                    (depth_prefix + "/camera_info", "/depth/camera_info"),
                 ],
                 output="screen",
             ),
@@ -174,9 +178,11 @@ def generate_launch_description():
                         cmd=[
                             "bash",
                             "-c",
-                            "until ros2 lifecycle set /slam_toolbox configure; do sleep 2; done"
+                            "until ros2 lifecycle set /slam_toolbox configure;"
+                            " do sleep 2; done"
                             " && sleep 2"
-                            " && until ros2 lifecycle set /slam_toolbox activate; do sleep 2; done",
+                            " && until ros2 lifecycle set /slam_toolbox activate;"
+                            " do sleep 2; done",
                         ],
                         output="screen",
                     ),
