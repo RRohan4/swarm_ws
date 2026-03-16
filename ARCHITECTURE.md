@@ -4,290 +4,186 @@
 
 ```
 swarm_ws/
-├── docker/
-│   ├── Dockerfile.base         # ROS 2 Jazzy + Gazebo + nav2 + slam_toolbox base layer
-│   ├── Dockerfile.sim          # extends base: Gazebo headless + world assets
-│   ├── Dockerfile.robot        # extends base: per-robot node stack
-│   ├── Dockerfile.radio        # extends base: radio god node only
-│   └── compose.yaml            # Docker Compose orchestration (sim + radio + N robots)
+├── Dockerfile
+├── compose.yaml
 └── src/
-    ├── swarm_msgs/          # Custom ROS interfaces only (no executables)
-    ├── swarm_radio/         # Mock radio "god" node — singleton, global namespace
-    ├── swarm_perception/    # Per-robot: LIDAR processing, pseudo-3D world model
-    ├── swarm_comms/         # Per-robot: TX/RX queuing, FEC, ARQ, heartbeat, peer registry
-    ├── swarm_slam/          # Per-robot: slam_toolbox wrapper, map fragment I/O, peer map merge
-    ├── swarm_exploration/   # Per-robot: NBV candidate sampling, info-gain scoring, submodular claim consensus, role FSM
-    ├── swarm_coordinator/   # Per-robot: distributed coordinator, no central authority
-    └── swarm_bringup/       # Maze SDF, launch files, nav2/SLAM param YAMLs
+    ├── swarm_msgs/          # ament_cmake — custom ROS interfaces only (no executables)
+    ├── swarm_slam/          # ament_python — per-robot SLAM wrapper + global map merge
+    ├── swarm_exploration/   # ament_python — frontier detector, coordinator, robot FSM
+    └── swarm_bringup/       # ament_python — launch files, worlds, configs
 ```
 
-Existing `src/swarm_exploration/` launch files → folded into `swarm_bringup/`.
+**Dropped from earlier design:** `swarm_radio` (comm simulation), `swarm_comms` (FEC/ARQ/heartbeat),
+`swarm_perception` (pseudo-3D elevation), `swarm_coordinator` (distributed peer consensus),
+`ViewpointClaim` protocol. All robots communicate freely via shared ROS 2 topics — no radio
+god node, no comm radius, no packet loss simulation.
 
 ---
 
 ## Custom Messages — `swarm_msgs`
 
-### Messages
-
-**`RadioEnvelope.msg`** — wrapper for all inter-robot comms
+**`RobotStatus.msg`**
 ```
 std_msgs/Header header
-string   src_robot_id
-string   dst_robot_id        # specific ID or "BROADCAST"
-uint8    msg_type            # MAP_FRAGMENT=1, VIEWPOINT_CLAIM=2, PEER_STATUS=3,
-                             # DISCOVERY=4, GOAL_FOUND=5, ACK=6, HEARTBEAT=7
-uint32   seq_num
-uint32   ack_num
-uint8    fec_scheme          # 0=none, 1=Hamming(7,4), 2=RS(255,223)
-uint8[]  fec_payload
-uint16   crc16               # CRC-16/CCITT of raw payload before FEC
-bool     is_fragment
-uint8    fragment_index
-uint8    fragment_total
+string               robot_id
+uint8                state          # EXPLORING=0  WAITING=1  DONE=2
+geometry_msgs/Pose   pose
+uint32               map_cells_known
+uint32               frontiers_remaining
 ```
 
-**`MapFragment.msg`** — compressed occupancy grid delta from a peer
+**`Frontier.msg`**
+```
+geometry_msgs/Point  centroid       # world frame
+uint32               cluster_size   # number of frontier pixels in cluster
+float32              info_score     # cluster_size / path_cost (filled by coordinator)
+string               assigned_to    # robot_id or "" if unassigned
+```
+
+**`FrontierArray.msg`**
 ```
 std_msgs/Header header
-string                   origin_robot_id
-uint32                   fragment_seq
-nav_msgs/MapMetaData     map_info
-uint8[]                  data_compressed       # zlib-compressed OccupancyGrid.data
-geometry_msgs/Pose       robot_pose_in_map
-uint64                   timestamp_ns
-```
-
-**`ViewpointClaim.msg`** — NBV candidate claim broadcast
-```
-std_msgs/Header header
-string                 claimant_robot_id
-uint32                 claim_id              # hash(robot_id XOR candidate_pose)
-geometry_msgs/Pose     candidate_pose        # evaluated viewpoint in world frame
-float32                expected_info_gain    # expected entropy reduction (nats)
-float32                claim_radius_m        # exclusion zone radius around candidate
-uint8                  claim_state           # CLAIMING=0, CONFIRMED=1, RELEASED=2, EXPIRED=3
-uint32                 ttl_ms
-```
-
-**`PeerStatus.msg`**
-```
-std_msgs/Header header
-string                 robot_id
-uint8                  operational_state     # ACTIVE=0, RELAY=1, RECOVERING=2, FAILED=3
-float32                battery_fraction      # 0.0–1.0 (proxy: 1 - distance_traveled / max_range)
-uint32                 viewpoints_visited
-uint32                 map_cells_known
-geometry_msgs/Pose     current_pose
-float32                comms_quality         # rolling RSSI proxy 0.0–1.0
-```
-
-**`SwarmDiscovery.msg`**
-```
-std_msgs/Header header
-string                 announcing_robot_id
-string[]               known_peer_ids
-uint32                 swarm_epoch           # monotonically increasing; detects partitions
-geometry_msgs/Pose[]   known_poses
-```
-
-**`GoalFound.msg`**
-```
-std_msgs/Header header
-string                       discovering_robot_id
-geometry_msgs/PoseStamped    goal_pose
-float32                      confidence
-bool                         confirmed             # true once two robots independently verify
-```
-
-### Services
-
-**`RequestMapFragment.srv`**
-```
-string   requesting_robot_id
-uint32   last_known_seq       # requester's highest received seq; peer replies with delta
----
-swarm_msgs/MapFragment[]  fragments
-bool                      success
-```
-
-**`ClaimViewpoint.srv`**
-```
-swarm_msgs/ViewpointClaim  claim
----
-bool    granted
-string  conflict_robot_id   # populated if granted=false
-```
-
-### Actions
-
-**`ExploreViewpoint.action`**
-```
-# Goal
-geometry_msgs/Pose  target_viewpoint
-string              assigned_role      # "scout" | "mapper" | "relay"
----
-# Result
-bool     goal_found
-uint32   cells_added_to_map
-float32  distance_traveled_m
----
-# Feedback
-geometry_msgs/Pose  current_pose
-float32             info_gain_so_far
-uint32              candidates_remaining
+swarm_msgs/Frontier[] frontiers
 ```
 
 ---
 
-## Mock Radio God Node — `swarm_radio`
+## Node Graph
 
-**Node:** `radio_god_node` — single instance, global namespace, sole broker for all inter-robot communication.
-
-**Subscribes:**
-- `/robot_N/odom` (`nav_msgs/Odometry`) — one dynamic subscription per robot, caches positions
-- `/radio/tx` (`RadioEnvelope`) — outbound messages from any robot
-
-**Publishes:**
-- `/robot_N/radio/rx` (`RadioEnvelope`) — delivered (possibly corrupted) messages per robot
-- `/radio/channel_state` (`diagnostic_msgs/DiagnosticArray`) — per-pair RSSI/link quality
-
-**Channel simulation pipeline (per message):**
-1. Resolve `dst_robot_id` → recipient list (single robot or all except src)
-2. For each recipient: compute Euclidean distance from cached odom
-3. Drop if distance > `comm_radius_m`
-4. Log-distance path loss model → RSSI; drop if RSSI < noise floor
-5. Check per-pair dropout registry; drop if inside active dropout window
-6. Roll `dropout_probability`; if hit, open dropout window (`dropout_duration_min/max_ms`), drop
-7. Compute delivery delay: `latency_base_ms` + Gaussian(`latency_jitter_std_ms`); schedule via ROS timer
-8. At delivery: BER-proportional bit-flipping on `fec_payload` bytes
-
-**Key parameters (`radio_params.yaml`):**
-```yaml
-radio_god_node:
-  ros__parameters:
-    robot_ids: ["robot_0", "robot_1", "robot_2"]
-    comm_radius_m: 4.0
-    path_loss_exponent: 2.5
-    reference_distance_m: 1.0
-    reference_rssi_dbm: -40.0
-    noise_floor_dbm: -90.0
-    ber_at_sensitivity: 0.01
-    dropout_probability: 0.05
-    dropout_duration_min_ms: 500
-    dropout_duration_max_ms: 3000
-    latency_base_ms: 10.0
-    latency_jitter_std_ms: 5.0
-```
-
----
-
-## Per-Robot Node Stack (namespace `/robot_N`)
-
-All inter-robot comms go exclusively through the radio god node. Each robot namespace runs 6 nodes.
-
-### 1. Perception Node — `swarm_perception/perception_node`
+### `map_merge_node` — `swarm_slam` (global namespace, singleton)
 
 | | Topic | Type |
 |---|---|---|
-| Sub | `/robot_N/scan` | `sensor_msgs/LaserScan` |
-| Pub | `/robot_N/obstacle_map` | `nav_msgs/OccupancyGrid` |
-| Pub | `/robot_N/elevation_map` | `grid_map_msgs/GridMap` |
-| Pub | `/robot_N/processed_scan` | `sensor_msgs/PointCloud2` |
+| Sub | `/robot_N/map` | `nav_msgs/OccupancyGrid` — one per robot (dynamic) |
+| Sub | `/robot_N/odom` | `nav_msgs/Odometry` — one per robot (dynamic) |
+| Pub | `/merged_map` | `nav_msgs/OccupancyGrid` — max-confidence merge |
+| Pub | `/robot_poses` | `geometry_msgs/PoseArray` — all robot positions |
 
-**Pseudo-3D elevation inference:** accumulate consecutive 2D LIDAR scans over an odom-tracked motion window; when a scan beam's range changes relative to a stationary reference beam, infer height change; maintain per-cell height layer in a `grid_map`. Detects wall-top edges and partial occlusions. Used by nav2 costmap for 3D-aware obstacle inflation.
+Merge rule: unknown(−1) < free(0) < occupied(100). All robots spawn at the same world origin
+so map frames are co-located — direct numpy overlay, no ICP required.
 
-### 2. SLAM / Map Fusion Node — `swarm_slam/slam_node`
+---
 
-| | Topic | Type |
-|---|---|---|
-| Sub | `/robot_N/scan` | `sensor_msgs/LaserScan` |
-| Sub | `/robot_N/odom` | `nav_msgs/Odometry` |
-| Sub | `/robot_N/radio/rx` | `swarm_msgs/RadioEnvelope` (MAP_FRAGMENT type) |
-| Pub | `/robot_N/map` | `nav_msgs/OccupancyGrid` (local) |
-| Pub | `/robot_N/merged_map` | `nav_msgs/OccupancyGrid` (peer-fused global estimate) |
-
-- Wraps `slam_toolbox` async SLAM per robot with `map_frame: robot_N/map`, `base_frame: robot_N/base_link`
-- **Map merge:** decompress received `MapFragment.data_compressed` (zlib), transform to common world frame using sender's `robot_pose_in_map`, merge into `merged_map` via max-confidence voting (unknown < free < occupied)
-- **Map export:** 5 Hz delta export — diff local map against last-sent snapshot, zlib-compress changed cells, publish as `MapFragment` via comms node TX request
-
-### 3. Communication Manager Node — `swarm_comms/comms_node`
+### `frontier_detector_node` — `swarm_exploration` (global namespace, singleton)
 
 | | Topic | Type |
 |---|---|---|
-| Sub | `/robot_N/radio/rx` | `swarm_msgs/RadioEnvelope` |
-| Sub | `/robot_N/comms/tx_request` | `swarm_msgs/RadioEnvelope` |
-| Pub | `/radio/tx` | `swarm_msgs/RadioEnvelope` |
-| Pub | `/robot_N/comms/rx_dispatch/map_fragment` | `swarm_msgs/MapFragment` |
-| Pub | `/robot_N/comms/rx_dispatch/viewpoint_claim` | `swarm_msgs/ViewpointClaim` |
-| Pub | `/robot_N/comms/rx_dispatch/peer_status` | `swarm_msgs/PeerStatus` |
-| Pub | `/robot_N/comms/rx_dispatch/discovery` | `swarm_msgs/SwarmDiscovery` |
-| Pub | `/robot_N/comms/rx_dispatch/goal_found` | `swarm_msgs/GoalFound` |
+| Sub | `/merged_map` | `nav_msgs/OccupancyGrid` |
+| Pub | `/frontiers` | `swarm_msgs/FrontierArray` |
+| Pub | `/frontier_markers` | `visualization_msgs/MarkerArray` |
 
-- **FEC:** Hamming(7,4) for control messages (low overhead); Reed-Solomon(255,223) for `MAP_FRAGMENT` (strong protection for large payloads)
-- **CRC:** CRC-16/CCITT on raw payload before FEC; corrupt messages → NACK → ARQ retransmit
-- **ARQ:** sliding window (size 8); retransmit unACK'd after `arq_timeout_ms=200`; max 3 retries then mark link degraded in peer registry
-- **Heartbeat:** emit `HEARTBEAT` envelope every 500ms; peer marked `FAILED` after 3 missed heartbeats (1.5s)
-- **Peer registry:** per-peer `{last_seen, rssi_proxy, operational_state, last_pose}`
+**Algorithm:**
 
-### 4. Exploration Planner Node — `swarm_exploration/exploration_node`
+```python
+import numpy as np
+from scipy import ndimage
 
-| | Topic | Type |
-|---|---|---|
-| Sub | `/robot_N/merged_map` | `nav_msgs/OccupancyGrid` |
-| Sub | `/robot_N/comms/rx_dispatch/viewpoint_claim` | `swarm_msgs/ViewpointClaim` |
-| Sub | `/robot_N/comms/rx_dispatch/peer_status` | `swarm_msgs/PeerStatus` |
-| Pub | `/robot_N/exploration_target` | `geometry_msgs/PoseStamped` |
-| Pub | `/robot_N/comms/tx_request` | `swarm_msgs/RadioEnvelope` |
+def detect_frontiers(grid, map_info):
+    arr = np.array(grid.data).reshape(grid.info.height, grid.info.width)
+    free    = (arr == 0)
+    unknown = (arr == -1)
+    # Frontier = free cell adjacent to at least one unknown cell
+    kernel = np.array([[0,1,0],[1,0,1],[0,1,0]])
+    unknown_neighbors = ndimage.convolve(unknown.astype(int), kernel, mode='constant') > 0
+    frontier_cells = free & unknown_neighbors
+    # Cluster (4-connectivity) and filter small clusters
+    labeled, n = ndimage.label(frontier_cells)
+    clusters = []
+    for i in range(1, n + 1):
+        cells = np.argwhere(labeled == i)
+        if len(cells) < 5:
+            continue
+        r, c = cells.mean(axis=0)
+        cx = map_info.origin.position.x + c * map_info.resolution
+        cy = map_info.origin.position.y + r * map_info.resolution
+        clusters.append({'centroid': (cx, cy), 'size': len(cells)})
+    return clusters
+```
 
-**NBV / Information-Gain Planning:**
+---
 
-1. **Candidate sampling:** uniformly sample poses from free-space cells adjacent to unknown cells on `merged_map`
-2. **Info-gain scoring:** for each candidate pose, raytrace simulated LIDAR beams (Bresenham) through the current map; count cells that would transition from unknown → known; score = `expected_new_cells / nav2_path_cost_to_candidate`
-3. **Submodular multi-robot coordination:** each robot broadcasts its top candidate with `expected_info_gain`; robot picks the candidate maximizing **marginal** gain — gain assuming peers already visit their claimed candidates first. This greedy submodular maximization yields ≥ (1 − 1/e) ≈ 63% of optimal joint coverage.
-4. **Claim protocol:**
-   - Broadcast `ViewpointClaim` with `claim_state=CLAIMING` and `claim_radius_m`
-   - Wait `claim_window_ms=300ms`; if peer claim overlaps (candidate within `claim_radius_m`), higher robot_id yields, re-evaluates next-best candidate
-   - Broadcast `CONFIRMED`; re-broadcast before TTL expiry to hold claim
-   - Release (`RELEASED`) when viewpoint reached or robot transitions to RELAY
-
-**Role FSM:**
-- `SCOUT` → navigate to highest-gain viewpoint, sample map, repeat
-- `MAPPER` → stay at current position, refine local map detail (triggered when gain < threshold)
-- `RELAY` → suspend exploration, position to maximise connectivity between isolated peers
-
-**Goal detection:** detect goal marker (unique LIDAR retroreflector signature) during scan processing; publish `GoalFound`; await independent confirmation from one other robot before broadcasting halt
-
-### 5. Local Swarm Coordinator Node — `swarm_coordinator/coordinator_node`
+### `coordinator_node` — `swarm_exploration` (global namespace, singleton)
 
 | | Topic | Type |
 |---|---|---|
-| Sub | `/robot_N/comms/rx_dispatch/peer_status` | `swarm_msgs/PeerStatus` |
-| Sub | `/robot_N/comms/rx_dispatch/discovery` | `swarm_msgs/SwarmDiscovery` |
-| Sub | `/robot_N/comms/rx_dispatch/goal_found` | `swarm_msgs/GoalFound` |
-| Pub | `/robot_N/coordinator/role_assignment` | `std_msgs/String` |
-| Pub | `/robot_N/comms/tx_request` | `swarm_msgs/RadioEnvelope` |
+| Sub | `/frontiers` | `swarm_msgs/FrontierArray` |
+| Sub | `/robot_poses` | `geometry_msgs/PoseArray` |
+| Sub | `/robot_N/status` | `swarm_msgs/RobotStatus` — one per robot |
+| Pub | `/robot_N/exploration_target` | `geometry_msgs/PoseStamped` — one per robot |
+| Pub | `/assignment_markers` | `visualization_msgs/MarkerArray` |
 
-- **Epoch-based peer view:** broadcast `SwarmDiscovery` every 2s with full known-peer list; on epoch mismatch merge via union of known peers
-- **Relay election:** if comms_node reports robot A and C have no direct link but both link to B → coordinator transitions B to `RELAY`; B navigates to midpoint of A–C segment
-- **Failure handling:** on peer `FAILED`, broadcast peer's last-known claimed viewpoint as `RELEASED`; remaining robots immediately re-evaluate candidates
-- **Partition recovery:** isolated robot (no peers heard for 5s) navigates toward last-known peer position to restore comms, then resumes exploration
+Runs at **1 Hz** (and on any robot status change). Greedy submodular frontier assignment:
 
-### 6. Navigation — `nav2` per robot
+```python
+def assign(frontiers, robot_poses):
+    assignments = {}
+    claimed = set()
 
-- All nav2 lifecycle nodes in `/robot_N` namespace
-- Global/local costmaps consume `/robot_N/merged_map` and `/robot_N/obstacle_map`
-- `/robot_N/elevation_map` fed into 3D-aware inflation layer
-- Controller publishes `/robot_N/cmd_vel`
+    for robot_id in sorted(robot_poses.keys()):
+        best_frontier, best_score = None, -1
+        for f in frontiers:
+            if f in claimed:
+                continue
+            path_cost = get_nav2_path_cost(robot_poses[robot_id], f.centroid)
+            score = f.cluster_size / max(path_cost, 0.1)
+            if score > best_score:
+                best_score, best_frontier = score, f
+        if best_frontier:
+            assignments[robot_id] = best_frontier
+            claimed.add(best_frontier)
+
+    return assignments
+```
+
+Nav2 path cost: call `/robot_N/compute_path_to_pose` (ComputePathToPose action) to get real
+path length. Falls back to Euclidean distance if Nav2 is not ready.
+
+---
+
+### `robot_fsm_node` — `swarm_exploration` (per robot, namespace `/robot_N`)
+
+| | Topic | Type |
+|---|---|---|
+| Sub | `/robot_N/exploration_target` | `geometry_msgs/PoseStamped` |
+| Sub | `/robot_N/map` | `nav_msgs/OccupancyGrid` |
+| Pub | `/robot_N/status` | `swarm_msgs/RobotStatus` — published at 2 Hz |
+| Action | `/robot_N/navigate_to_pose` | `nav2_msgs/action/NavigateToPose` |
+
+**State machine:**
+
+```
+WAITING   → EXPLORING : new target received from coordinator
+EXPLORING → WAITING   : Nav2 goal succeeded  OR  local frontier exhausted
+EXPLORING → WAITING   : Nav2 goal failed (obstacle / unreachable) — coordinator reassigns
+WAITING   → DONE      : coordinator publishes empty FrontierArray
+```
+
+---
+
+### Nav2 stack — per robot, namespace `/robot_N`
+
+Standard Nav2 lifecycle nodes. Global and local costmaps consume `/robot_N/map`.
+Controller publishes `/robot_N/cmd_vel`.
 
 ---
 
 ## Gazebo World
 
-**`swarm_bringup/worlds/maze_world.sdf`** — 12×12m arena with internal maze walls and a goal marker (retroreflective box at maze end with distinct cross-section for LIDAR detection).
+**`swarm_bringup/worlds/maze_world.sdf`** — pre-generated 12×12 m maze arena.
 
-Multi-robot spawning: parameterized robot model `{robot_id}`, spawned N times via `gz service /world/swarm_world/create` calls from the launch file with offset initial poses.
+Robot spawns (both inside maze entrance, one grid cell apart):
 
-All Gazebo plugin topics namespaced per robot: `/robot_N/cmd_vel`, `/robot_N/odom`, `/robot_N/scan`, `/robot_N/tf`.
+| Robot | x | y | z | yaw |
+|---|---|---|---|---|
+| robot_0 | 0.6 | 0.6 | 0.05 | 1.5708 |
+| robot_1 | 1.8 | 0.6 | 0.05 | 1.5708 |
+
+All Gazebo plugin topics namespaced per robot: `/robot_N/cmd_vel`, `/robot_N/odom`,
+`/robot_N/scan`, `/robot_N/tf`.
+
+**TF frames:** `map_frame: robot_N/map` per SLAM instance. A static
+`world → robot_N/map` identity transform is published at startup so all robots share
+a common reference frame without ICP.
 
 ---
 
@@ -295,17 +191,17 @@ All Gazebo plugin topics namespaced per robot: `/robot_N/cmd_vel`, `/robot_N/odo
 
 ```
 launch/
-  swarm.launch.py           # top-level: Gazebo + radio god + N × robot_stack
-  robot_stack.launch.py     # per-robot include: perception, comms, slam, exploration, coordinator, nav2
-  radio_god.launch.py       # radio_god_node with channel params
-  single_robot.launch.py    # kept for single-robot dev/debug
+  swarm.launch.py           # top-level: Gazebo + N × robot_stack + global nodes
+  robot_stack.launch.py     # per-robot: RSP + gz_bridge + SLAM lifecycle + Nav2
+  single_robot.launch.py    # kept for single-robot regression testing
 
 config/
-  radio_params.yaml         # radio god channel simulation params
-  nav2_params.yaml          # nav2 config (robot_N namespace substitution via LaunchConfiguration)
+  nav2_params.yaml          # Nav2 config (robot_N namespace via LaunchConfiguration)
   slam_params.yaml          # slam_toolbox per-robot config
-  swarm_params.yaml         # NBV scoring weights, ARQ timeouts, heartbeat intervals, relay thresholds
 ```
+
+The Gazebo bridge config is generated programmatically per robot in `robot_stack.launch.py`
+so that `/model/robot_N/cmd_vel` maps to `/robot_N/cmd_vel`.
 
 ---
 
@@ -313,68 +209,52 @@ config/
 
 | Decision | Choice | Rationale |
 |---|---|---|
-| Exploration strategy | NBV / information-gain (Charrow et al. 2015) | Principled multi-robot via submodular maximization; no frontier degenerate cases in narrow corridors |
-| Multi-robot coordination | Greedy submodular (marginal gain) | (1−1/e) optimality guarantee; fits naturally into distributed claim broadcast |
-| Central vs. distributed | Fully distributed; radio god is infrastructure only | Resilient to any single robot failure |
-| Map sharing | Delta compression (zlib) + 5 Hz cap | Bandwidth vs. freshness; prevents radio saturation |
-| FEC scheme | Hamming(7,4) small msgs / RS(255,223) map fragments | Match overhead to payload size and error sensitivity |
-| Viewpoint claim | Optimistic TTL + marginal-gain yield on conflict | Avoids distributed lock contention; higher robot_id breaks ties |
-| Relay election | Connectivity-triggered, midpoint positioning | Greedy but effective for maze topology |
-| 2D → pseudo-3D | Scan stacking over odom-tracked motion | No extra hardware; sufficient for maze obstacle detection |
+| Communication | Global ROS 2 topics, no radio simulation | Eliminates comm complexity; focus on exploration strategy |
+| Exploration strategy | Greedy submodular frontier assignment | ≥ (1−1/e) ≈ 63 % of optimal coverage; simple to implement and reason about |
+| Coordination | Central `coordinator_node` | Single point of assignment is correct and deterministic; resilience not required for this scope |
+| Map sharing | Direct `/robot_N/map` subscriptions, numpy overlay | No compression overhead; bandwidth is unconstrained in sim |
+| Frontier scoring | `cluster_size / nav2_path_cost` | Balances information gain against travel cost without raycasting |
+| Frontier detection | `scipy.ndimage` label on merged map | Fast, dependency-free, well-tested |
+| TF alignment | Identity static transform at spawn | Robots start at known offsets; no ICP needed |
 
 ---
 
 ## Node Graph Summary
 
 ```
-                    ┌──────────────────────┐
-                    │   radio_god_node     │  (global ns)
-                    │  /radio/tx  →  route │
-                    │  → /robot_N/radio/rx │
-                    └──────────┬───────────┘
-                               │ per robot
-          ┌────────────────────┼────────────────────┐
-          │                    │                    │
-   /robot_0/...          /robot_1/...         /robot_2/...
-          │
-   ┌──────┴────────────────────────────────────┐
-   │  perception_node                          │
-   │    /scan → /obstacle_map, /elevation_map  │
-   ├───────────────────────────────────────────┤
-   │  slam_node                                │
-   │    /scan + /odom + rx → /map, /merged_map │
-   ├───────────────────────────────────────────┤
-   │  comms_node                               │
-   │    /radio/rx ↔ /radio/tx                  │
-   │    → /comms/rx_dispatch/*                 │
-   ├───────────────────────────────────────────┤
-   │  exploration_node  (NBV planner)          │
-   │    /merged_map → /exploration_target      │
-   │    ↔ /comms/tx_request (ViewpointClaim)   │
-   ├───────────────────────────────────────────┤
-   │  coordinator_node                         │
-   │    peer_status/discovery → role_assignment│
-   ├───────────────────────────────────────────┤
-   │  nav2 stack                               │
-   │    /exploration_target → /cmd_vel         │
-   └───────────────────────────────────────────┘
+Gazebo Sim
+  /robot_N/scan, /robot_N/odom, /robot_N/tf
+        │
+        ▼
+  slam_toolbox (per robot)
+  /robot_N/map
+        │
+        ▼
+  map_merge_node ──────────────────────────────────┐
+  /merged_map                /robot_poses           │
+        │                         │                 │
+        ▼                         ▼                 │
+  frontier_detector_node    coordinator_node ◄──────┘
+  /frontiers                  │  /robot_N/status (from FSM)
+  /frontier_markers           │
+                              │  /robot_N/exploration_target
+                              ▼
+                        robot_fsm_node (per robot)
+                          Nav2 NavigateToPose
+                          /robot_N/cmd_vel
 ```
 
 ---
 
 ## Docker / Containerization
 
-### Files
-
 ```
 swarm_ws/
-├── Dockerfile          # single image: all nodes, built once
-└── compose.yaml        # one service per role; docker compose build && up
+├── Dockerfile      # single image: all nodes
+└── compose.yaml    # one service per robot + sim
 ```
 
 ### Dockerfile
-
-Single multi-stage build. All packages compiled once into one image; the entrypoint is overridden per service in `compose.yaml`.
 
 ```dockerfile
 FROM osrf/ros:jazzy-desktop AS base
@@ -382,7 +262,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-nav2-bringup ros-jazzy-slam-toolbox \
     ros-jazzy-ros-gz-bridge gz-harmonic \
     python3-pip && rm -rf /var/lib/apt/lists/*
-RUN pip3 install --no-cache-dir numpy scipy crcmod reedsolo
+RUN pip3 install --no-cache-dir numpy scipy
 
 WORKDIR /ws
 COPY src/ src/
@@ -399,62 +279,67 @@ services:
     network_mode: host
     command: >
       bash -c ". /ws/install/setup.sh &&
-               ros2 launch swarm_bringup gazebo.launch.py"
-
-  radio:
-    build: .
-    network_mode: host
-    command: >
-      bash -c ". /ws/install/setup.sh &&
-               ros2 launch swarm_bringup radio_god.launch.py"
-    depends_on: [sim]
+               ros2 launch swarm_bringup swarm.launch.py"
 
   robot_0:
     build: .
     network_mode: host
-    environment: {ROBOT_ID: robot_0, ROBOT_INIT_X: "0.0", ROBOT_INIT_Y: "0.0"}
+    environment: {ROBOT_ID: robot_0, ROBOT_INIT_X: "0.6", ROBOT_INIT_Y: "0.6"}
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 launch swarm_bringup robot_stack.launch.py
                robot_id:=$ROBOT_ID x:=$ROBOT_INIT_X y:=$ROBOT_INIT_Y"
-    depends_on: [sim, radio]
+    depends_on: [sim]
 
   robot_1:
     build: .
     network_mode: host
-    environment: {ROBOT_ID: robot_1, ROBOT_INIT_X: "1.0", ROBOT_INIT_Y: "0.0"}
+    environment: {ROBOT_ID: robot_1, ROBOT_INIT_X: "1.8", ROBOT_INIT_Y: "0.6"}
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 launch swarm_bringup robot_stack.launch.py
                robot_id:=$ROBOT_ID x:=$ROBOT_INIT_X y:=$ROBOT_INIT_Y"
-    depends_on: [sim, radio]
-
-  robot_2:
-    build: .
-    network_mode: host
-    environment: {ROBOT_ID: robot_2, ROBOT_INIT_X: "2.0", ROBOT_INIT_Y: "0.0"}
-    command: >
-      bash -c ". /ws/install/setup.sh &&
-               ros2 launch swarm_bringup robot_stack.launch.py
-               robot_id:=$ROBOT_ID x:=$ROBOT_INIT_X y:=$ROBOT_INIT_Y"
-    depends_on: [sim, radio]
+    depends_on: [sim]
 ```
 
-`network_mode: host` gives all containers shared host networking so ROS 2 DDS multicast discovery works with no extra configuration.
+`network_mode: host` gives all containers shared host networking so ROS 2 DDS multicast
+discovery works with no extra configuration.
 
 ### Adding Robots
 
-Copy any `robot_N` block in `compose.yaml`, increment the ID, and set new initial coordinates. No rebuild needed — it's the same image.
+Copy any `robot_N` block in `compose.yaml`, increment the ID, and set new initial
+coordinates. No rebuild required — same image.
 
 ---
 
 ## Verification
 
 ```bash
-docker compose build
-docker compose up
+docker compose build && docker compose up
 
-# from host, verify radio god routing and all robot nodes are alive
-ros2 topic echo /radio/channel_state --once
-ros2 node list | grep -E "(radio_god|robot_[0-2]/(perception|comms|slam|exploration|coordinator))"
+# Nodes alive
+ros2 node list | grep -E "(map_merge|frontier|coordinator|robot_fsm)"
+
+# Watch assignments
+ros2 topic echo /robot_0/exploration_target
+ros2 topic echo /robot_1/exploration_target
+
+# Watch coverage grow
+ros2 topic echo /merged_map --field info
+
+# Foxglove panels:
+#   3D:  /merged_map (OccupancyGrid) + /frontier_markers + /assignment_markers + TF
+#   Plot: /robot_0/status.map_cells_known + /robot_1/status.map_cells_known vs time
 ```
+
+## Implementation Phases
+
+| Phase | Description | Test |
+|---|---|---|
+| 0 | Single robot on maze world ✅ | SLAM + Foxglove working; `single_robot.launch.py` for regression |
+| 1 | `swarm_msgs` package | `colcon build --packages-select swarm_msgs` + `ros2 interface show swarm_msgs/msg/Frontier` |
+| 2 | Multi-robot launch (Gazebo + N × robot_stack) | `ros2 topic list \| grep robot_` shows `/robot_0/map`, `/robot_1/map`; Nav2 goal via topic works |
+| 3 | `map_merge_node` | Teleoperate robots to opposite sides; `/merged_map` shows combined area in Foxglove |
+| 4 | `frontier_detector_node` | `/frontier_markers` shows spheres at unexplored openings; markers disappear as robot explores |
+| 5 | `robot_fsm_node` | Manually publish to `/robot_0/exploration_target` → robot navigates autonomously |
+| 6 | `coordinator_node` (capstone) | Both robots auto-explore maze; `/assignment_markers` shows robot→frontier lines; robots never share a frontier; 2-robot coverage ~2× faster than 1 |
