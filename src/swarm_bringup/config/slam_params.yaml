@@ -1,0 +1,27 @@
+# slam_toolbox async params — loaded per robot.
+# robot_id is substituted by robot_stack.launch.py via RewrittenYaml.
+slam_toolbox:
+  ros__parameters:
+    use_sim_time: true
+
+    # Frames — substituted at launch time
+    map_frame: robot_id_placeholder/map
+    odom_frame: robot_id_placeholder/odom
+    base_frame: robot_id_placeholder/base_footprint
+
+    scan_topic: scan # relative → resolves to /robot_N/scan in namespace
+    mode: mapping
+
+    max_laser_range: 9.9
+    minimum_travel_distance: 0.05
+    minimum_travel_heading: 0.1
+    map_update_interval: 0.5
+
+    resolution: 0.05
+    max_motion_model_error: 0.1
+    do_loop_closing: true
+    loop_search_space_dimension: 8.0
+    loop_match_minimum_chain_size: 10
+    loop_match_maximum_variance_coarse: 3.0
+    loop_match_minimum_response_coarse: 0.35
+    loop_match_minimum_response_fine: 0.45

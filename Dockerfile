@@ -23,18 +23,33 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Python deps for future swarm nodes (comms FEC, math)
-RUN pip3 install --no-cache-dir --break-system-packages numpy scipy crcmod reedsolo
+# Python deps for swarm nodes
+RUN pip3 install --no-cache-dir --break-system-packages numpy scipy
 
 WORKDIR /ws
 
-# Copy only src so Docker layer cache survives non-src changes
-COPY src/ src/
+# ── Per-package COPY + build for fine-grained layer caching ──────────────────
+# Each package gets its own layer: changing one package only invalidates
+# that layer and any packages that depend on it downstream.
 
-# Build only packages that have manifests; swarm_msgs is currently empty
+# swarm_msgs (ament_cmake — generates C++ headers, changes rarely)
+COPY src/swarm_msgs/ src/swarm_msgs/
 RUN . /opt/ros/jazzy/setup.sh \
-    && colcon build \
-        --packages-select swarm_exploration
+    && colcon build --packages-select swarm_msgs
 
-# Default shell for sourced entrypoints
+# swarm_slam (ament_python — symlink-install means no recompile needed)
+COPY src/swarm_slam/ src/swarm_slam/
+RUN . /opt/ros/jazzy/setup.sh && . install/setup.sh \
+    && colcon build --symlink-install --packages-select swarm_slam
+
+# swarm_exploration (ament_python)
+COPY src/swarm_exploration/ src/swarm_exploration/
+RUN . /opt/ros/jazzy/setup.sh && . install/setup.sh \
+    && colcon build --symlink-install --packages-select swarm_exploration
+
+# swarm_bringup (ament_python — launch files and configs)
+COPY src/swarm_bringup/ src/swarm_bringup/
+RUN . /opt/ros/jazzy/setup.sh && . install/setup.sh \
+    && colcon build --symlink-install --packages-select swarm_bringup
+
 SHELL ["/bin/bash", "-c"]
