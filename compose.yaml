@@ -3,11 +3,13 @@ services:
   sim:
     build: .
     network_mode: host
+    ipc: host
     environment:
       - DISPLAY=${DISPLAY:-:0}
       - QT_X11_NO_MITSHM=1
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/shm:/dev/shm
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 launch swarm_bringup gazebo.launch.py"
@@ -16,6 +18,14 @@ services:
   robot_0:
     build: .
     network_mode: host
+    ipc: host
+    environment:
+      - SWARM_ROBOT_ID=robot_0
+      - SWARM_X=0.6
+      - SWARM_Y=0.6
+      - SWARM_YAW=1.5708
+    volumes:
+      - /dev/shm:/dev/shm
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 launch swarm_bringup robot_stack.launch.py
@@ -25,6 +35,14 @@ services:
   robot_1:
     build: .
     network_mode: host
+    ipc: host
+    environment:
+      - SWARM_ROBOT_ID=robot_1
+      - SWARM_X=1.8
+      - SWARM_Y=0.6
+      - SWARM_YAW=1.5708
+    volumes:
+      - /dev/shm:/dev/shm
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 launch swarm_bringup robot_stack.launch.py
@@ -35,6 +53,9 @@ services:
   map_merge:
     build: .
     network_mode: host
+    ipc: host
+    volumes:
+      - /dev/shm:/dev/shm
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 launch swarm_bringup map_merge.launch.py
@@ -44,6 +65,9 @@ services:
   foxglove:
     build: .
     network_mode: host
+    ipc: host
+    volumes:
+      - /dev/shm:/dev/shm
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 run foxglove_bridge foxglove_bridge
@@ -54,11 +78,13 @@ services:
   sim_single:
     build: .
     network_mode: host
+    ipc: host
     environment:
       - DISPLAY=${DISPLAY:-:0}
       - QT_X11_NO_MITSHM=1
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/shm:/dev/shm
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 launch swarm_exploration single_robot.launch.py"

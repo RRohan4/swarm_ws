@@ -19,6 +19,7 @@ from launch.actions import (
     ExecuteProcess,
 )
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 
 
 def generate_launch_description():
@@ -42,6 +43,16 @@ def generate_launch_description():
             ),
             ExecuteProcess(
                 cmd=["gz", "sim", "-r", "-s", LaunchConfiguration("world")],
+                output="screen",
+            ),
+            # Single clock bridge — must only run once to avoid interleaved
+            # timestamps that crash SLAM's tf2 buffer when /dev/shm is shared.
+            Node(
+                package="ros_gz_bridge",
+                executable="parameter_bridge",
+                name="gz_clock_bridge",
+                arguments=["/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock"],
+                parameters=[{"use_sim_time": False}],
                 output="screen",
             ),
         ]

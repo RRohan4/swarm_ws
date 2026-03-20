@@ -1,6 +1,7 @@
 # slam_toolbox async params — loaded per robot.
-# robot_id is substituted by robot_stack.launch.py via RewrittenYaml.
-slam_toolbox:
+# robot_id_placeholder is substituted at launch time by robot_stack.launch.py.
+# /**  wildcard matches /robot_N/slam_toolbox so the namespaced node sees its params.
+/**:
   ros__parameters:
     use_sim_time: true
 

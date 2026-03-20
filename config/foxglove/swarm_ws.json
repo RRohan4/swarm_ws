@@ -14,9 +14,25 @@
         "far": 5000
       },
       "followMode": "no-follow",
-      "fixedFrame": "robot_0/map",
-      "scene": {},
-      "transforms": {},
+      "fixedFrame": "world",
+      "scene": {
+        "transforms": {
+          "showLabel": false,
+          "axisScale": 0
+        }
+      },
+      "transforms": {
+        "robot_0/base_link": {
+          "visible": true,
+          "axisScale": 1.5,
+          "showLabel": true
+        },
+        "robot_1/base_link": {
+          "visible": true,
+          "axisScale": 1.5,
+          "showLabel": true
+        }
+      },
       "topics": {
         "/merged_map": {
           "visible": true
@@ -34,16 +50,16 @@
           "pointSize": 3
         },
         "/frontier_markers": {
-          "visible": true
+          "visible": false
         },
         "/assignment_markers": {
-          "visible": true
+          "visible": false
         },
         "/robot_0/exploration_target": {
-          "visible": true
+          "visible": false
         },
         "/robot_1/exploration_target": {
-          "visible": true
+          "visible": false
         },
         "/robot_poses": {
           "visible": true

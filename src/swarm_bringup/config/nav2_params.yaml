@@ -11,9 +11,9 @@ bt_navigator:
     default_server_timeout: 20
     navigators: ["navigate_to_pose", "navigate_through_poses"]
     navigate_to_pose:
-      plugin: "nav2_bt_navigator/NavigateToPoseNavigator"
+      plugin: "nav2_bt_navigator::NavigateToPoseNavigator"
     navigate_through_poses:
-      plugin: "nav2_bt_navigator/NavigateThroughPosesNavigator"
+      plugin: "nav2_bt_navigator::NavigateThroughPosesNavigator"
 
 controller_server:
   ros__parameters:
@@ -67,15 +67,13 @@ controller_server:
       short_circuit_trajectory_evaluation: true
       stateful: true
       critics:
-        [
-          "RotateToGoal",
-          "Oscillation",
-          "BaseObstacle",
-          "GoalAlign",
-          "PathAlign",
-          "PathDist",
-          "GoalDist",
-        ]
+        - "RotateToGoal"
+        - "Oscillation"
+        - "BaseObstacle"
+        - "GoalAlign"
+        - "PathAlign"
+        - "PathDist"
+        - "GoalDist"
       BaseObstacle.scale: 0.02
       PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1
@@ -170,26 +168,25 @@ planner_server:
   ros__parameters:
     expected_planner_frequency: 20.0
     use_sim_time: true
-    planners:
-      - name: GridBased
-        type: nav2_navfn_planner/NavfnPlanner
+    planner_plugins: ["GridBased"]
     GridBased:
+      plugin: "nav2_navfn_planner::NavfnPlanner"
       use_astar: false
       allow_unknown: true
       tolerance: 0.5
 
-recoveries_server:
+behavior_server:
   ros__parameters:
     costmap_topic: local_costmap/costmap_raw
     footprint_topic: local_costmap/published_footprint
     cycle_frequency: 10.0
-    recovery_plugins: ["spin", "back_up", "wait"]
+    behavior_plugins: ["spin", "backup", "wait"]
     spin:
-      plugin: "nav2_recoveries/Spin"
-    back_up:
-      plugin: "nav2_recoveries/BackUp"
+      plugin: "nav2_behaviors::Spin"
+    backup:
+      plugin: "nav2_behaviors::BackUp"
     wait:
-      plugin: "nav2_recoveries/Wait"
+      plugin: "nav2_behaviors::Wait"
     global_frame: robot_id_placeholder/odom
     robot_base_frame: robot_id_placeholder/base_footprint
     transform_timeout: 0.1
@@ -198,6 +195,19 @@ recoveries_server:
     max_rotational_vel: 1.0
     min_rotational_vel: 0.4
     rotational_acc_lim: 3.2
+
+collision_monitor:
+  ros__parameters:
+    use_sim_time: true
+    base_frame_id: robot_id_placeholder/base_footprint
+    odom_frame_id: robot_id_placeholder/odom
+    cmd_vel_in_topic: cmd_vel_nav
+    cmd_vel_out_topic: cmd_vel
+    transform_tolerance: 0.5
+    source_timeout: 5.0
+    stop_pub_timeout: 2.0
+    polygons: []
+    observation_sources: []
 
 robot_state_publisher:
   ros__parameters:
