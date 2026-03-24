@@ -24,8 +24,9 @@ from launch_ros.actions import LifecycleNode, Node
 def generate_launch_description():
     tb3_dir = get_package_share_directory("nav2_minimal_tb3_sim")
     swarm_dir = get_package_share_directory("swarm_exploration")
+    bringup_dir = get_package_share_directory("swarm_bringup")
 
-    world = os.path.join(swarm_dir, "worlds", "robot_world.sdf")
+    world = os.path.join(bringup_dir, "worlds", "maze_world.sdf")
     robot_xacro = os.path.join(swarm_dir, "urdf", "gz_waffle.sdf.xacro")
     robot_urdf = os.path.join(swarm_dir, "urdf", "turtlebot3_waffle.urdf")
     bridge_yaml = os.path.join(tb3_dir, "configs", "turtlebot3_waffle_bridge.yaml")

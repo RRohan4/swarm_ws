@@ -99,7 +99,11 @@ class MapMergeNode(Node):
             t = tf.transform.translation
             yaw = _yaw_from_quat(tf.transform.rotation)
             return (t.x, t.y, yaw)
-        except Exception:
+        except Exception as e:
+            self.get_logger().warn(
+                f"TF lookup failed for {frame} → world: {e}",
+                throttle_duration_sec=10.0,
+            )
             return None
 
     # ── Merge and publish ──────────────────────────────────────────────────────

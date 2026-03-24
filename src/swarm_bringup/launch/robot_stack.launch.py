@@ -68,14 +68,6 @@ def _write_bridge_config(robot_id: str) -> str:
             "gz_type_name": "gz.msgs.Pose_V",
             "direction": "GZ_TO_ROS",
         },
-        # Joint states
-        {
-            "ros_topic_name": f"/{robot_id}/joint_states",
-            "gz_topic_name": f"/{robot_id}/joint_states",
-            "ros_type_name": "sensor_msgs/msg/JointState",
-            "gz_type_name": "gz.msgs.Model",
-            "direction": "GZ_TO_ROS",
-        },
     ]
     tmp = tempfile.NamedTemporaryFile(
         mode="w", suffix=f"_{robot_id}_bridge.yaml", delete=False
@@ -116,7 +108,6 @@ def launch_setup(context, *args, **kwargs):
     # With network_mode: host, all containers share the same ROS2 DDS domain and
     # ros2 launch argument resolution gets cross-contaminated across containers.
     # Environment variables are set per-service in compose.yaml and are immune to this.
-    import os
 
     robot_id = os.environ.get(
         "SWARM_ROBOT_ID", LaunchConfiguration("robot_id").perform(context)
@@ -128,8 +119,6 @@ def launch_setup(context, *args, **kwargs):
 
     bringup_dir = get_package_share_directory("swarm_bringup")
     exploration_dir = get_package_share_directory("swarm_exploration")
-    nav2_bringup_dir = get_package_share_directory("nav2_bringup")
-
     robot_xacro = os.path.join(exploration_dir, "urdf", "gz_waffle.sdf.xacro")
     robot_urdf = os.path.join(exploration_dir, "urdf", "turtlebot3_waffle.urdf")
     slam_params = _make_slam_params(
@@ -176,12 +165,32 @@ def launch_setup(context, *args, **kwargs):
             output="screen",
         ),
         # ── Static TF: world → robot_N/map (identity; co-located spawns) ──────
+        # Do NOT use use_sim_time here — static_transform_publisher blocks waiting
+        # for /clock before publishing when use_sim_time is True, but static
+        # transforms use timestamp=0 regardless of clock. Publishing immediately
+        # ensures the TF is available to map_merge and SLAM from the start.
         Node(
             package="tf2_ros",
             executable="static_transform_publisher",
             name=f"world_to_{robot_id}_map",
-            arguments=[x, y, "0", yaw, "0", "0", "world", f"{robot_id}/map"],
-            parameters=[{"use_sim_time": True}],
+            arguments=[
+                "--x",
+                x,
+                "--y",
+                y,
+                "--z",
+                "0",
+                "--yaw",
+                yaw,
+                "--pitch",
+                "0",
+                "--roll",
+                "0",
+                "--frame-id",
+                "world",
+                "--child-frame-id",
+                f"{robot_id}/map",
+            ],
             output="screen",
         ),
         # ── Spawn robot in Gazebo ──────────────────────────────────────────────
@@ -252,7 +261,8 @@ def launch_setup(context, *args, **kwargs):
                         " 2>&1 | grep -q 'success=True';"
                         " do sleep 1; done"
                         " && sleep 2"
-                        f" && until ros2 service call /{robot_id}/slam_toolbox/change_state"
+                        f" && until ros2 service call"
+                        f" /{robot_id}/slam_toolbox/change_state"
                         " lifecycle_msgs/srv/ChangeState '{transition: {id: 3}}'"
                         " 2>&1 | grep -q 'success=True';"
                         " do sleep 1; done",

@@ -5,7 +5,7 @@ Top-level launch: Gazebo + N robot stacks + global nodes (map_merge, foxglove).
 Global exploration nodes (frontier_detector, coordinator) are added in Phase 4–6.
 
 Args:
-  world      : path to .sdf world file (default: robot_world.sdf from swarm_exploration)
+  world      : path to .sdf world file (default: maze_world.sdf from swarm_bringup)
   num_robots : number of robots to spawn (default: 2)
 """
 
@@ -116,8 +116,8 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    exploration_dir = get_package_share_directory("swarm_exploration")
-    default_world = os.path.join(exploration_dir, "worlds", "robot_world.sdf")
+    bringup_dir = get_package_share_directory("swarm_bringup")
+    default_world = os.path.join(bringup_dir, "worlds", "maze_world.sdf")
 
     return LaunchDescription(
         [

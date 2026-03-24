@@ -20,7 +20,7 @@ repos:
       - id: prettier
         name: Prettier (XML, XACRO, JSON, YAML)
         language: system
-        entry: npx prettier --write
+        entry: prettier --write
         files: \.(xml|xacro|json|yaml|yml)$
 
   # Python linting + formatting via Ruff

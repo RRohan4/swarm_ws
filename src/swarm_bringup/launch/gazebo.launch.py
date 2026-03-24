@@ -5,7 +5,7 @@ Starts Gazebo Harmonic headless with the configured world.
 Run as its own service; robot stacks connect to it via Gazebo transport.
 
 Args:
-  world : path to .sdf world file (default: robot_world.sdf from swarm_exploration)
+  world : path to .sdf world file (default: maze_world.sdf from swarm_bringup)
 """
 
 import os
@@ -23,9 +23,9 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    exploration_dir = get_package_share_directory("swarm_exploration")
+    bringup_dir = get_package_share_directory("swarm_bringup")
     tb3_dir = get_package_share_directory("nav2_minimal_tb3_sim")
-    default_world = os.path.join(exploration_dir, "worlds", "robot_world.sdf")
+    default_world = os.path.join(bringup_dir, "worlds", "maze_world.sdf")
 
     return LaunchDescription(
         [

@@ -33,7 +33,7 @@ def generate_launch_description():
         "waypoint_follower",
     ]
 
-    # No TF remapping needed — all robot frames are already namespaced (robot_0/*, robot_1/*)
+    # No TF remapping needed — robot frames are namespaced (robot_0/*, robot_1/*)
     # so all robots can safely share the global /tf topic without frame-name conflicts.
     remappings = []
 
