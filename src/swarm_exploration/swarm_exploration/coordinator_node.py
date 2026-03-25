@@ -42,6 +42,10 @@ MIN_DISPATCH_DIST = 0.5
 BLACKLIST_DIST = 1.0
 # Seconds before a blacklist entry expires (map may have changed)
 BLACKLIST_TTL = 120.0
+# Seconds to wait after a robot finishes a goal before reassigning.
+# Gives the SLAM → map_merge → frontier_detector pipeline time to reveal
+# new frontiers (e.g. further down a corridor the robot was already exploring).
+REASSIGN_COOLDOWN = 1.0
 
 
 class CoordinatorNode(Node):
@@ -62,6 +66,10 @@ class CoordinatorNode(Node):
         self._robot_status: dict[str, RobotStatus] = {}
         self._prev_state: dict[str, int] = {}  # previous state per robot
         self._assigned_target: dict[str, Point] = {}  # current assignment per robot
+        # Last heading direction per robot (unit vector) — for momentum bonus
+        self._last_heading: dict[str, tuple[float, float]] = {}
+        # Timestamp when each robot last entered WAITING (for reassignment cooldown)
+        self._waiting_since: dict[str, float] = {}
         # Per-robot blacklist: list of (centroid, ros_timestamp) for failed targets
         self._blacklist: dict[str, list[tuple[Point, float]]] = {
             rid: [] for rid in self._robot_ids
@@ -104,18 +112,20 @@ class CoordinatorNode(Node):
         # EXPLORING (0) → WAITING (1) means navigation finished.
         # If the old target is still in the frontier list, the robot likely
         # failed to reach it — blacklist so the coordinator picks a different one.
-        if prev == 0 and msg.state == 1 and robot_id in self._assigned_target:
-            target = self._assigned_target.pop(robot_id)
-            # Check if the target frontier still exists (success removes it)
-            for f in self._frontiers:
-                if _dist(f.centroid, target) < BLACKLIST_DIST:
-                    now = self.get_clock().now().nanoseconds * 1e-9
-                    self._blacklist[robot_id].append((target, now))
-                    self.get_logger().info(
-                        f"[coordinator] blacklisted ({target.x:.1f}, "
-                        f"{target.y:.1f}) for {robot_id}"
-                    )
-                    break
+        if prev == 0 and msg.state == 1:
+            now = self.get_clock().now().nanoseconds * 1e-9
+            self._waiting_since[robot_id] = now
+            if robot_id in self._assigned_target:
+                target = self._assigned_target.pop(robot_id)
+                # Check if the target frontier still exists (success removes it)
+                for f in self._frontiers:
+                    if _dist(f.centroid, target) < BLACKLIST_DIST:
+                        self._blacklist[robot_id].append((target, now))
+                        self.get_logger().info(
+                            f"[coordinator] blacklisted ({target.x:.1f}, "
+                            f"{target.y:.1f}) for {robot_id}"
+                        )
+                        break
         self._prev_state[robot_id] = msg.state
         self._robot_status[robot_id] = msg
 
@@ -140,12 +150,17 @@ class CoordinatorNode(Node):
         if not self._robot_poses:
             return
 
-        # Only assign to WAITING robots (state == 1)
+        # Only assign to WAITING robots (state == 1) past their cooldown.
+        # The cooldown lets SLAM/map_merge/frontier_detector catch up so new
+        # nearby frontiers (e.g. further down a corridor) appear before we
+        # reassign the robot to a distant frontier.
+        now_ts = self.get_clock().now().nanoseconds * 1e-9
         waiting_robots = [
             rid
             for rid in self._robot_ids
             if self._robot_status.get(rid) is not None
             and self._robot_status[rid].state == 1
+            and now_ts - self._waiting_since.get(rid, 0.0) >= REASSIGN_COOLDOWN
         ]
 
         if not waiting_robots:
@@ -182,6 +197,12 @@ class CoordinatorNode(Node):
             if pos is None:
                 continue
 
+            # If a robot is WAITING but still has an assigned target, clear it
+            # so a new one can be assigned. Don't blacklist — the failure may
+            # have been transient (e.g. Nav2 not ready yet).
+            if rid in self._assigned_target:
+                self._assigned_target.pop(rid)
+
             # Filter out blacklisted frontiers for this robot
             candidates = [
                 f for f in available if not self._is_blacklisted(rid, f.centroid)
@@ -209,6 +230,14 @@ class CoordinatorNode(Node):
         # Publish targets and record assignments
         stamp = self.get_clock().now().to_msg()
         for rid, frontier in assignments.items():
+            # Record heading direction (robot → frontier) for momentum bonus
+            pos = self._robot_poses.get(rid)
+            if pos is not None:
+                dx = frontier.centroid.x - pos.x
+                dy = frontier.centroid.y - pos.y
+                norm = math.sqrt(dx * dx + dy * dy)
+                if norm > 0.01:
+                    self._last_heading[rid] = (dx / norm, dy / norm)
             self._assigned_target[rid] = frontier.centroid
             ps = PoseStamped()
             ps.header = Header(stamp=stamp, frame_id="world")
@@ -240,6 +269,19 @@ class CoordinatorNode(Node):
         proximity = 1.0 / max(d, 0.1) ** 2
         # Cluster size provides a mild bonus (sqrt to dampen large clusters)
         score = math.sqrt(frontier.cluster_size) * proximity
+
+        # Momentum bonus: strongly prefer frontiers in the same direction
+        # the robot was already heading. This makes robots commit to corridors
+        # and continue exploring forward rather than backtracking.
+        heading = self._last_heading.get(robot_id)
+        if heading is not None and d > 0.1:
+            dx = frontier.centroid.x - robot_pos.x
+            dy = frontier.centroid.y - robot_pos.y
+            # cos(angle) between last heading and frontier direction
+            cos_angle = (heading[0] * dx + heading[1] * dy) / d
+            # Range [-1, 1] → [0.1, 3.0]: forward = 3×, backward = 0.1×
+            # Strong bias keeps robots committed to their exploration corridor
+            score *= 0.1 + 1.45 * (1.0 + cos_angle)
 
         # Penalize frontiers near OTHER robots (not just busy targets) —
         # encourages each robot to explore its own neighbourhood

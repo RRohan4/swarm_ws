@@ -36,7 +36,7 @@ class FrontierDetectorNode(Node):
         super().__init__("frontier_detector_node")
 
         self.declare_parameter("min_frontier_size", 5)
-        self.declare_parameter("detect_rate", 2.0)
+        self.declare_parameter("detect_rate", 5.0)
 
         self._min_size: int = (
             self.get_parameter("min_frontier_size").get_parameter_value().integer_value
@@ -80,7 +80,7 @@ class FrontierDetectorNode(Node):
         # that the robot cannot physically reach without clipping walls.
         obstacle_buffer = ndimage.binary_dilation(
             occupied,
-            structure=np.ones((5, 5)),  # ~2 cells clearance at 0.05m res
+            structure=np.ones((3, 3)),  # ~1 cell clearance at 0.05m res
         )
         safe_free = free & ~obstacle_buffer
 

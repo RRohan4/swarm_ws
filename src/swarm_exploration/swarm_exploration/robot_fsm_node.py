@@ -22,6 +22,9 @@ Parameters:
   goal_timeout    : float seconds before aborting a goal (default 60.0)
 """
 
+import math
+
+import numpy as np
 import rclpy
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action import NavigateToPose
@@ -32,6 +35,11 @@ from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from std_msgs.msg import Header
 
 from swarm_msgs.msg import FrontierArray, RobotStatus
+
+# If no frontier centroid is within this distance of the current target,
+# the target is considered resolved (mapped by sensors) and navigation
+# is cancelled so the coordinator can reassign immediately.
+FRONTIER_VANISHED_DIST = 1.0
 
 MAP_QOS = QoSProfile(
     depth=1,
@@ -65,11 +73,13 @@ class RobotFSMNode(Node):
 
         self._state = WAITING
         self._current_target: PoseStamped | None = None
+        self._pending_target: PoseStamped | None = None  # queued when Nav2 not ready
         self._goal_handle = None
         self._goal_start_time: float | None = None
         self._map_cells_known = 0
         self._frontiers_remaining = 0
         self._latest_pose_stamped: PoseStamped | None = None
+        self._nav2_ready = False
 
         # Nav2 action client
         self._nav_client = ActionClient(
@@ -121,28 +131,59 @@ class RobotFSMNode(Node):
         self._current_target = msg
         self._state = EXPLORING
         self._goal_start_time = self.get_clock().now().nanoseconds * 1e-9
-        self._send_goal(msg)
+
+        # Non-blocking: if Nav2 is ready, send immediately; otherwise queue
+        if self._nav2_ready:
+            self._send_goal(msg)
+        else:
+            self._pending_target = msg
+            self.get_logger().info(
+                f"[{self._robot_id}] Nav2 not ready, queuing target "
+                f"({x:.2f}, {y:.2f}) — will retry on tick"
+            )
 
     def _map_cb(self, msg: OccupancyGrid) -> None:
-        data = msg.data
-        self._map_cells_known = sum(1 for c in data if c != -1)
+        self._map_cells_known = int(np.count_nonzero(np.array(msg.data, dtype=np.int8) != -1))
 
     def _frontiers_cb(self, msg: FrontierArray) -> None:
         self._frontiers_remaining = len(msg.frontiers)
         if self._frontiers_remaining == 0 and self._state == WAITING:
             self._state = DONE
+            return
+
+        # While navigating, check if the target frontier still exists.
+        # If the robot's sensors have already mapped that area the frontier
+        # disappears from the list — cancel navigation immediately so the
+        # coordinator can assign the next frontier without waiting for the
+        # robot to physically arrive at a now-pointless location.
+        if (
+            self._state == EXPLORING
+            and self._current_target is not None
+            and self._goal_handle is not None
+        ):
+            tx = self._current_target.pose.position.x
+            ty = self._current_target.pose.position.y
+            still_exists = any(
+                math.hypot(f.centroid.x - tx, f.centroid.y - ty)
+                < FRONTIER_VANISHED_DIST
+                for f in msg.frontiers
+            )
+            if not still_exists:
+                self.get_logger().info(
+                    f"[{self._robot_id}] Target frontier resolved by sensors, "
+                    "cancelling navigation"
+                )
+                self._cancel_goal()
+                self._state = WAITING
 
     # ── Nav2 interaction ───────────────────────────────────────────────────────
 
     def _send_goal(self, target: PoseStamped) -> None:
-        if not self._nav_client.wait_for_server(timeout_sec=5.0):
-            self.get_logger().warn(
-                f"[{self._robot_id}] "
-                "NavigateToPose server not available, staying WAITING"
-            )
-            self._state = WAITING
+        if not self._nav2_ready:
+            self._pending_target = target
             return
 
+        self._pending_target = None
         goal = NavigateToPose.Goal()
         goal.pose = target
 
@@ -184,6 +225,19 @@ class RobotFSMNode(Node):
     # ── Periodic tick ──────────────────────────────────────────────────────────
 
     def _tick(self) -> None:
+        # Non-blocking Nav2 server readiness check
+        was_ready = self._nav2_ready
+        self._nav2_ready = self._nav_client.server_is_ready()
+        if not was_ready and self._nav2_ready:
+            self.get_logger().info(f"[{self._robot_id}] Nav2 server is now available")
+
+        # Retry pending target once Nav2 becomes ready
+        if self._pending_target is not None and self._nav2_ready:
+            self.get_logger().info(
+                f"[{self._robot_id}] Sending queued goal"
+            )
+            self._send_goal(self._pending_target)
+
         # Check for goal timeout while exploring
         if (
             self._state == EXPLORING
