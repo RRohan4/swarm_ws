@@ -1,183 +1,338 @@
 {
   "configById": {
-    "3D!swarm": {
+    "3D!4hdne1a": {
       "cameraState": {
-        "perspective": true,
-        "distance": 22,
-        "phi": 68,
-        "thetaOffset": -135,
-        "targetOffset": [5, 5, 0],
+        "perspective": false,
+        "distance": 17.1474999999419,
+        "phi": 12.711070865188494,
+        "thetaOffset": 18.087621660133333,
+        "targetOffset": [
+          -1.322067431710511, 0.03309801944088058, 3.531967228921944e-17
+        ],
         "target": [0, 0, 0],
         "targetOrientation": [0, 0, 0, 1],
         "fovy": 45,
         "near": 0.5,
         "far": 5000
       },
-      "followMode": "no-follow",
+      "followMode": "follow-none",
+      "followTf": "world",
       "fixedFrame": "world",
       "scene": {
         "transforms": {
-          "showLabel": false,
-          "axisScale": 0
+          "showLabel": false
         }
       },
       "transforms": {
-        "robot_0/base_link": {
-          "visible": true,
-          "axisScale": 1.5,
-          "showLabel": true
+        "frame:robot_0/map": {
+          "visible": false
         },
-        "robot_1/base_link": {
-          "visible": true,
-          "axisScale": 1.5,
-          "showLabel": true
+        "frame:world": {
+          "visible": true
+        },
+        "frame:robot_1/base_footprint": {
+          "visible": false
+        },
+        "frame:robot_1/base_link": {
+          "visible": false
+        },
+        "frame:robot_1/base_scan": {
+          "visible": false
+        },
+        "frame:robot_1/camera_link": {
+          "visible": false
+        },
+        "frame:robot_1/camera_depth_frame": {
+          "visible": false
+        },
+        "frame:robot_1/camera_depth_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_1/camera_rgb_frame": {
+          "visible": false
+        },
+        "frame:robot_1/camera_rgb_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_1/caster_back_left_link": {
+          "visible": false
+        },
+        "frame:robot_1/caster_back_right_link": {
+          "visible": false
+        },
+        "frame:robot_1/imu_link": {
+          "visible": true
+        },
+        "frame:robot_1/map": {
+          "visible": false
+        },
+        "frame:robot_0/base_footprint": {
+          "visible": false
+        },
+        "frame:robot_0/base_link": {
+          "visible": false
+        },
+        "frame:robot_0/base_scan": {
+          "visible": false
+        },
+        "frame:robot_0/camera_link": {
+          "visible": false
+        },
+        "frame:robot_0/camera_depth_frame": {
+          "visible": false
+        },
+        "frame:robot_0/camera_depth_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_0/camera_rgb_frame": {
+          "visible": false
+        },
+        "frame:robot_0/camera_rgb_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_0/caster_back_left_link": {
+          "visible": false
+        },
+        "frame:robot_0/caster_back_right_link": {
+          "visible": false
+        },
+        "frame:robot_0/imu_link": {
+          "visible": true
+        },
+        "frame:robot_0/odom": {
+          "visible": false
+        },
+        "frame:robot_1/odom": {
+          "visible": false
+        },
+        "frame:robot_0/wheel_left_link": {
+          "visible": true
+        },
+        "frame:robot_0/wheel_right_link": {
+          "visible": true
+        },
+        "frame:robot_1/wheel_left_link": {
+          "visible": true
+        },
+        "frame:robot_1/wheel_right_link": {
+          "visible": true
+        },
+        "frame:": {
+          "visible": false
         }
       },
       "topics": {
-        "/merged_map": {
-          "visible": true
+        "/robot_1/map": {
+          "visible": false
+        },
+        "/robot_0/local_costmap/costmap": {
+          "visible": false
+        },
+        "/robot_0/marker": {
+          "visible": false
+        },
+        "/robot_0/slam_toolbox/graph_visualization": {
+          "visible": false
+        },
+        "/robot_1/marker": {
+          "visible": false
+        },
+        "/robot_1/slam_toolbox/graph_visualization": {
+          "visible": false
         },
         "/robot_0/scan": {
           "visible": true,
-          "colorMode": "flat",
-          "flatColor": "#00aaff",
-          "pointSize": 3
+          "colorField": "range",
+          "colorMode": "colormap",
+          "colorMap": "rainbow",
+          "pointShape": "cube",
+          "decayTime": 0
+        },
+        "/robot_0/slam_toolbox/scan_visualization": {
+          "visible": false
         },
         "/robot_1/scan": {
           "visible": true,
-          "colorMode": "flat",
-          "flatColor": "#ff6600",
-          "pointSize": 3
+          "colorField": "range",
+          "colorMode": "colormap",
+          "colorMap": "turbo",
+          "pointShape": "cube"
         },
-        "/frontier_markers": {
-          "visible": false
+        "/robot_1/slam_toolbox/scan_visualization": {
+          "visible": false,
+          "pointShape": "cube"
         },
-        "/assignment_markers": {
-          "visible": false
-        },
-        "/robot_0/exploration_target": {
-          "visible": false
-        },
-        "/robot_1/exploration_target": {
-          "visible": false
-        },
-        "/robot_poses": {
+        "/merged_map": {
           "visible": true
+        },
+        "/robot_0/global_costmap/costmap": {
+          "visible": false
+        },
+        "/robot_0/global_costmap/map": {
+          "visible": false
+        },
+        "/robot_0/global_costmap/obstacle_layer": {
+          "visible": false
+        },
+        "/robot_0/global_costmap/static_layer": {
+          "visible": false
+        },
+        "/robot_0/local_costmap/voxel_layer": {
+          "visible": false
         },
         "/robot_0/map": {
           "visible": false
         },
-        "/robot_1/map": {
+        "/robot_1/global_costmap/costmap": {
+          "visible": true
+        },
+        "/robot_1/global_costmap/map": {
           "visible": false
+        },
+        "/robot_1/global_costmap/obstacle_layer": {
+          "visible": false
+        },
+        "/robot_1/global_costmap/static_layer": {
+          "visible": false
+        },
+        "/robot_1/local_costmap/costmap": {
+          "visible": false
+        },
+        "/robot_1/local_costmap/voxel_layer": {
+          "visible": false
+        },
+        "/robot_0/cost_cloud": {
+          "visible": false
+        },
+        "/robot_0/local_costmap/clearing_endpoints": {
+          "visible": false
+        },
+        "/robot_1/cost_cloud": {
+          "visible": false
+        },
+        "/robot_1/local_costmap/clearing_endpoints": {
+          "visible": false
+        },
+        "/robot_0/global_costmap/published_footprint": {
+          "visible": false
+        },
+        "/robot_0/local_costmap/published_footprint": {
+          "visible": false
+        },
+        "/robot_1/global_costmap/published_footprint": {
+          "visible": false
+        },
+        "/robot_1/local_costmap/published_footprint": {
+          "visible": false
+        },
+        "/initialpose": {
+          "visible": false
+        },
+        "/move_base_simple/goal": {
+          "visible": false
+        },
+        "/robot_0/goal_pose": {
+          "visible": false
+        },
+        "/robot_0/pose": {
+          "visible": false
+        },
+        "/robot_1/goal_pose": {
+          "visible": false
+        },
+        "/robot_1/pose": {
+          "visible": false
+        },
+        "/robot_0/local_plan": {
+          "visible": false
+        },
+        "/robot_0/plan": {
+          "visible": false
+        },
+        "/robot_0/plan_smoothed": {
+          "visible": false
+        },
+        "/robot_0/received_global_plan": {
+          "visible": false
+        },
+        "/robot_0/transformed_global_plan": {
+          "visible": true
+        },
+        "/robot_1/local_plan": {
+          "visible": false
+        },
+        "/robot_1/plan": {
+          "visible": false
+        },
+        "/robot_1/plan_smoothed": {
+          "visible": false
+        },
+        "/robot_1/received_global_plan": {
+          "visible": false
+        },
+        "/robot_1/transformed_global_plan": {
+          "visible": true
+        },
+        "/robot_poses": {
+          "visible": false
+        },
+        "/robot_0/local_costmap/voxel_grid": {
+          "visible": false
+        },
+        "/robot_1/local_costmap/voxel_grid": {
+          "visible": false
+        },
+        "/robot_0/global_costmap/scan": {
+          "visible": false
+        },
+        "/robot_0/local_costmap/scan": {
+          "visible": false
+        },
+        "/robot_1/local_costmap/scan": {
+          "visible": false
+        },
+        "/robot_1/global_costmap/scan": {
+          "visible": false
+        },
+        "/robot_1/exploration_target": {
+          "visible": false,
+          "type": "axis"
+        },
+        "/robot_0/exploration_target": {
+          "visible": false,
+          "type": "axis"
+        },
+        "/frontier_markers": {
+          "visible": true,
+          "showOutlines": true
         }
       },
       "layers": {
         "grid": {
           "visible": true,
-          "drawBehind": true,
+          "drawBehind": false,
           "label": "Grid",
-          "instanceId": "grid-swarm",
+          "instanceId": "531a4f61-6455-4447-8ca5-3001d6ec7206",
           "layerId": "foxglove.Grid",
-          "size": 20,
-          "divisions": 20,
+          "size": 10,
+          "divisions": 10,
           "lineWidth": 1,
-          "color": "#248eff44",
+          "color": "#248eff",
           "position": [0, 0, 0],
           "rotation": [0, 0, 0]
         }
       },
       "publish": {
-        "type": "goal",
-        "poseTopic": "/robot_0/goal_pose",
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
         "pointTopic": "/clicked_point",
         "poseEstimateTopic": "/initialpose",
         "poseEstimateXDeviation": 0.5,
         "poseEstimateYDeviation": 0.5,
         "poseEstimateThetaDeviation": 0.26179939
       },
+      "synchronize": false,
       "imageMode": {}
-    },
-    "Plot!positions": {
-      "title": "Robot positions (Phase 3+)",
-      "isSynced": true,
-      "legend": {
-        "display": "floating",
-        "showLegend": true,
-        "position": "bottom-left"
-      },
-      "showXAxisLabels": true,
-      "showYAxisLabels": true,
-      "showPlotValuesInLegend": true,
-      "xAxisVal": "timestamp",
-      "paths": [
-        {
-          "value": "/robot_0/odom.pose.pose.position.x",
-          "enabled": true,
-          "timestampMethod": "receiveTime",
-          "label": "robot_0 x",
-          "color": "#00aaff"
-        },
-        {
-          "value": "/robot_0/odom.pose.pose.position.y",
-          "enabled": true,
-          "timestampMethod": "receiveTime",
-          "label": "robot_0 y",
-          "color": "#0066cc"
-        },
-        {
-          "value": "/robot_1/odom.pose.pose.position.x",
-          "enabled": true,
-          "timestampMethod": "receiveTime",
-          "label": "robot_1 x",
-          "color": "#ff6600"
-        },
-        {
-          "value": "/robot_1/odom.pose.pose.position.y",
-          "enabled": true,
-          "timestampMethod": "receiveTime",
-          "label": "robot_1 y",
-          "color": "#cc3300"
-        }
-      ],
-      "minYValue": "",
-      "maxYValue": "",
-      "followingViewWidth": 120
-    },
-    "Plot!coverage": {
-      "title": "Map Coverage — cells known (Phase 5+)",
-      "isSynced": true,
-      "legend": {
-        "display": "floating",
-        "showLegend": true,
-        "position": "bottom-left"
-      },
-      "showXAxisLabels": true,
-      "showYAxisLabels": true,
-      "showPlotValuesInLegend": true,
-      "xAxisVal": "timestamp",
-      "paths": [
-        {
-          "value": "/robot_0/status.map_cells_known",
-          "enabled": true,
-          "timestampMethod": "receiveTime",
-          "label": "robot_0",
-          "color": "#00aaff"
-        },
-        {
-          "value": "/robot_1/status.map_cells_known",
-          "enabled": true,
-          "timestampMethod": "receiveTime",
-          "label": "robot_1",
-          "color": "#ff6600"
-        }
-      ],
-      "minYValue": "0",
-      "maxYValue": "",
-      "followingViewWidth": 120
-    },
-    "Log!console": {
-      "searchTerms": [],
-      "minLogLevel": 1
     }
   },
   "globalVariables": {},
@@ -185,20 +340,5 @@
   "playbackConfig": {
     "speed": 1
   },
-  "layout": {
-    "first": "3D!swarm",
-    "second": {
-      "first": {
-        "first": "Plot!positions",
-        "second": "Plot!coverage",
-        "direction": "column",
-        "splitPercentage": 50
-      },
-      "second": "Log!console",
-      "direction": "column",
-      "splitPercentage": 68
-    },
-    "direction": "row",
-    "splitPercentage": 65
-  }
+  "layout": "3D!4hdne1a"
 }
