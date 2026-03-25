@@ -89,8 +89,6 @@ def launch_setup(context, *args, **kwargs):
         )
 
     # ── Global nodes (Phase 3+) ────────────────────────────────────────────────
-    # map_merge_node and frontier_detector_node are added here
-    # as phases are implemented.
     actions.append(
         TimerAction(
             period=15.0,
@@ -111,6 +109,74 @@ def launch_setup(context, *args, **kwargs):
             ],
         )
     )
+
+    # ── Phase 4: frontier detector ─────────────────────────────────────────────
+    actions.append(
+        TimerAction(
+            period=25.0,
+            actions=[
+                Node(
+                    package="swarm_exploration",
+                    executable="frontier_detector_node",
+                    name="frontier_detector_node",
+                    parameters=[
+                        {
+                            "use_sim_time": True,
+                            "min_frontier_size": 5,
+                            "detect_rate": 2.0,
+                        }
+                    ],
+                    output="screen",
+                ),
+            ],
+        )
+    )
+
+    # ── Phase 6: coordinator ───────────────────────────────────────────────────
+    actions.append(
+        TimerAction(
+            period=25.0,
+            actions=[
+                Node(
+                    package="swarm_exploration",
+                    executable="coordinator_node",
+                    name="coordinator_node",
+                    parameters=[
+                        {
+                            "use_sim_time": True,
+                            "robot_ids": robot_ids,
+                            "rate": 1.0,
+                        }
+                    ],
+                    output="screen",
+                ),
+            ],
+        )
+    )
+
+    # ── Phase 5: per-robot FSM ─────────────────────────────────────────────────
+    for robot_id in robot_ids:
+        actions.append(
+            TimerAction(
+                period=25.0,
+                actions=[
+                    Node(
+                        package="swarm_exploration",
+                        executable="robot_fsm_node",
+                        name=f"robot_fsm_{robot_id}",
+                        parameters=[
+                            {
+                                "use_sim_time": True,
+                                "robot_id": robot_id,
+                                "status_rate": 2.0,
+                                "goal_timeout": 60.0,
+                            }
+                        ],
+                        output="screen",
+                    ),
+                ],
+            )
+        )
 
     return actions
 

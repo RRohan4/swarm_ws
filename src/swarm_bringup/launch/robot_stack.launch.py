@@ -21,8 +21,10 @@ from launch.actions import (
     GroupAction,
     IncludeLaunchDescription,
     OpaqueFunction,
+    RegisterEventHandler,
     TimerAction,
 )
+from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration
 from launch_ros.actions import Node, PushRosNamespace
@@ -249,59 +251,85 @@ def launch_setup(context, *args, **kwargs):
         # Use ros2 service call instead of ros2 lifecycle set — the latter relies
         # on ros2 node list discovery which can fail with network_mode: host DDS
         # sharing, while direct service calls always work once the node is up.
-        TimerAction(
-            period=10.0,
-            actions=[
-                ExecuteProcess(
-                    cmd=[
-                        "bash",
-                        "-c",
-                        f"until ros2 service call /{robot_id}/slam_toolbox/change_state"
-                        " lifecycle_msgs/srv/ChangeState '{transition: {id: 1}}'"
-                        " 2>&1 | grep -q 'success=True';"
-                        " do sleep 1; done"
-                        " && sleep 2"
-                        f" && until ros2 service call"
-                        f" /{robot_id}/slam_toolbox/change_state"
-                        " lifecycle_msgs/srv/ChangeState '{transition: {id: 3}}'"
-                        " 2>&1 | grep -q 'success=True';"
-                        " do sleep 1; done",
-                    ],
-                    output="screen",
-                ),
-            ],
+        #
+        # Nav2 is registered as an OnProcessExit handler on this process so it
+        # only starts after SLAM is confirmed active — meaning the robot has also
+        # been spawned in Gazebo (ros_gz_sim create blocks until Gazebo is ready),
+        # the odom→base_footprint TF chain exists, and the first map has been
+        # published.  This replaces the previous fixed 20s timer which fired
+        # before Gazebo finished loading the maze on slow hosts.
+        (
+            slam_lifecycle := ExecuteProcess(
+                cmd=[
+                    "bash",
+                    "-c",
+                    f"until ros2 service call /{robot_id}/slam_toolbox/change_state"
+                    " lifecycle_msgs/srv/ChangeState '{transition: {id: 1}}'"
+                    " 2>&1 | grep -q 'success=True';"
+                    " do sleep 1; done"
+                    " && sleep 2"
+                    f" && until ros2 service call"
+                    f" /{robot_id}/slam_toolbox/change_state"
+                    " lifecycle_msgs/srv/ChangeState '{transition: {id: 3}}'"
+                    " 2>&1 | grep -q 'success=True';"
+                    " do sleep 1; done"
+                    # Wait for the first map→odom TF to appear before Nav2 starts
+                    f" && until ros2 topic echo /{robot_id}/map --once"
+                    " --no-daemon 2>/dev/null | grep -q 'resolution';"
+                    " do sleep 1; done",
+                ],
+                output="screen",
+            )
         ),
         # ── Nav2 ───────────────────────────────────────────────────────────────
+        # Starts only after slam_lifecycle exits (SLAM active + first map ready).
         # Nav2 Jazzy's navigation_launch.py removed PushRosNamespace internally,
         # so we must push the namespace here so nodes land at /robot_N/controller_server
         # and RewrittenYaml(root_key=namespace) can resolve their parameters.
-        # Timer is 20s so SLAM has time to configure, activate, and publish the
-        # initial map→odom TF before global_costmap tries to look it up.
-        TimerAction(
-            period=20.0,
-            actions=[
-                GroupAction(
-                    actions=[
-                        PushRosNamespace(robot_id),
-                        IncludeLaunchDescription(
-                            PythonLaunchDescriptionSource(
-                                os.path.join(
-                                    bringup_dir, "launch", "navigation.launch.py"
-                                )
+        RegisterEventHandler(
+            OnProcessExit(
+                target_action=slam_lifecycle,
+                on_exit=[
+                    GroupAction(
+                        actions=[
+                            PushRosNamespace(robot_id),
+                            IncludeLaunchDescription(
+                                PythonLaunchDescriptionSource(
+                                    os.path.join(
+                                        bringup_dir, "launch", "navigation.launch.py"
+                                    )
+                                ),
+                                launch_arguments={
+                                    "use_sim_time": "True",
+                                    "namespace": robot_id,
+                                    "use_namespace": "True",
+                                    "params_file": nav2_params,
+                                    "slam": "False",
+                                    "map_subscribe_transient_local": "True",
+                                    "autostart": "True",
+                                }.items(),
                             ),
-                            launch_arguments={
-                                "use_sim_time": "True",
-                                "namespace": robot_id,
-                                "use_namespace": "True",
-                                "params_file": nav2_params,
-                                "slam": "False",
-                                "map_subscribe_transient_local": "True",
-                                "autostart": "True",
-                            }.items(),
-                        ),
-                    ]
-                ),
-            ],
+                        ]
+                    ),
+                    # ── robot_fsm_node (Phase 5) ───────────────────────────────
+                    # Starts alongside Nav2; its action client waits internally
+                    # for the NavigateToPose server to become available.
+                    Node(
+                        package="swarm_exploration",
+                        executable="robot_fsm_node",
+                        name=f"robot_fsm_{robot_id}",
+                        parameters=[
+                            {
+                                "use_sim_time": True,
+                                "robot_id": robot_id,
+                                "status_rate": 2.0,
+                                "goal_timeout": 60.0,
+                            }
+                        ],
+                        output="screen",
+                    ),
+                ],
+            )
         ),
     ]
     return nodes

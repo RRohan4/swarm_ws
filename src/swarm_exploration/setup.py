@@ -23,6 +23,10 @@ setup(
     license="Apache-2.0",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [],
+        "console_scripts": [
+            "frontier_detector_node = swarm_exploration.frontier_detector_node:main",
+            "coordinator_node = swarm_exploration.coordinator_node:main",
+            "robot_fsm_node = swarm_exploration.robot_fsm_node:main",
+        ],
     },
 )

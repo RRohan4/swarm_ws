@@ -1,8 +1,9 @@
 """
 map_merge.launch.py
 
-Launches the global map_merge_node singleton.
-Accepts robot_ids and num_robots as arguments so compose.yaml can stay clean.
+Launches global singleton nodes: map_merge_node, frontier_detector_node,
+coordinator_node.  Run as a single compose service after the robot stacks
+are up.
 
 Args:
   robot_ids  : comma-separated robot IDs, e.g. "robot_0,robot_1" (default)
@@ -21,6 +22,7 @@ def launch_setup(context, *args, **kwargs):
     robot_ids = [r.strip() for r in ids_str.split(",")]
 
     return [
+        # ── Phase 3: map merge ─────────────────────────────────────────────────
         Node(
             package="swarm_slam",
             executable="map_merge_node",
@@ -33,7 +35,35 @@ def launch_setup(context, *args, **kwargs):
                 }
             ],
             output="screen",
-        )
+        ),
+        # ── Phase 4: frontier detector ─────────────────────────────────────────
+        Node(
+            package="swarm_exploration",
+            executable="frontier_detector_node",
+            name="frontier_detector_node",
+            parameters=[
+                {
+                    "use_sim_time": True,
+                    "min_frontier_size": 5,
+                    "detect_rate": 2.0,
+                }
+            ],
+            output="screen",
+        ),
+        # ── Phase 6: coordinator ───────────────────────────────────────────────
+        Node(
+            package="swarm_exploration",
+            executable="coordinator_node",
+            name="coordinator_node",
+            parameters=[
+                {
+                    "use_sim_time": True,
+                    "robot_ids": robot_ids,
+                    "rate": 1.0,
+                }
+            ],
+            output="screen",
+        ),
     ]
 
 

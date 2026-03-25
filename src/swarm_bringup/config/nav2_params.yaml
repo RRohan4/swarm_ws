@@ -74,7 +74,7 @@ controller_server:
         - "PathAlign"
         - "PathDist"
         - "GoalDist"
-      BaseObstacle.scale: 0.02
+      BaseObstacle.scale: 0.05
       PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1
       GoalAlign.scale: 24.0
@@ -101,8 +101,8 @@ local_costmap:
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
-        inflation_radius: 0.55
+        cost_scaling_factor: 2.5
+        inflation_radius: 0.75
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: true
@@ -160,9 +160,10 @@ global_costmap:
         map_subscribe_transient_local: true
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
-        inflation_radius: 0.55
+        cost_scaling_factor: 2.5
+        inflation_radius: 0.75
       always_send_full_costmap: true
+      transform_tolerance: 1.0
 
 planner_server:
   ros__parameters:
@@ -171,9 +172,9 @@ planner_server:
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner::NavfnPlanner"
-      use_astar: false
+      use_astar: true
       allow_unknown: true
-      tolerance: 0.5
+      tolerance: 0.25
 
 behavior_server:
   ros__parameters:
@@ -187,27 +188,15 @@ behavior_server:
       plugin: "nav2_behaviors::BackUp"
     wait:
       plugin: "nav2_behaviors::Wait"
+    local_frame: robot_id_placeholder/odom
     global_frame: robot_id_placeholder/odom
     robot_base_frame: robot_id_placeholder/base_footprint
-    transform_timeout: 0.1
+    transform_timeout: 0.5
     use_sim_time: true
     simulate_ahead_time: 2.0
     max_rotational_vel: 1.0
     min_rotational_vel: 0.4
     rotational_acc_lim: 3.2
-
-collision_monitor:
-  ros__parameters:
-    use_sim_time: true
-    base_frame_id: robot_id_placeholder/base_footprint
-    odom_frame_id: robot_id_placeholder/odom
-    cmd_vel_in_topic: cmd_vel_nav
-    cmd_vel_out_topic: cmd_vel
-    transform_tolerance: 0.5
-    source_timeout: 5.0
-    stop_pub_timeout: 2.0
-    polygons: []
-    observation_sources: []
 
 robot_state_publisher:
   ros__parameters:

@@ -2,7 +2,7 @@
 """Generate a 29×29 orthogonal swarm-exploration maze.
 
 Structure:
-  - 9×9 open central staging area
+  - 5×5 open central staging area
   - Surrounding maze carved with Prim's randomised algorithm (grows outward)
   - Walls and corridors are 1 cell wide throughout
 
@@ -15,7 +15,7 @@ import random
 SEED = 42
 W, H = 29, 29
 CX, CY = W // 2, H // 2  # (14, 14)
-HUB_HALF = 4  # hub covers rows/cols CY±4  →  9×9
+HUB_HALF = 2  # hub covers rows/cols CY±2  →  5×5
 
 random.seed(SEED)
 
@@ -26,7 +26,7 @@ def carve(r: int, c: int) -> None:
     grid[r][c] = " "
 
 
-# ── Central hub (9×9) ─────────────────────────────────────────────────────────
+# ── Central hub (5×5) ─────────────────────────────────────────────────────────
 for r in range(CY - HUB_HALF, CY + HUB_HALF + 1):
     for c in range(CX - HUB_HALF, CX + HUB_HALF + 1):
         carve(r, c)
@@ -34,7 +34,7 @@ for r in range(CY - HUB_HALF, CY + HUB_HALF + 1):
 # ── Prim's maze generation ────────────────────────────────────────────────────
 # Cells in the logical maze grid sit at odd grid positions: 1, 3, …, 27  (14 each)
 # Cell (i, j) in [0,13]² maps to grid position (2i+1, 2j+1).
-# The hub occupies cell rows/cols 5-8 (grid rows/cols 11-17).
+# The hub occupies cell rows/cols 6-7 (grid rows/cols 12-16).
 
 NUM_CELLS = 14  # cells per dimension
 
@@ -44,8 +44,8 @@ def cell_to_grid(i: int, j: int) -> tuple[int, int]:
 
 
 def in_hub(i: int, j: int) -> bool:
-    hub_min = (CY - HUB_HALF + 1) // 2  # first cell index inside hub  = 5
-    hub_max = (CY + HUB_HALF - 1) // 2  # last  cell index inside hub  = 8
+    hub_min = (CY - HUB_HALF + 1) // 2  # first cell index inside hub  = 6
+    hub_max = (CY + HUB_HALF - 1) // 2  # last  cell index inside hub  = 7
     return hub_min <= i <= hub_max and hub_min <= j <= hub_max
 
 
@@ -110,7 +110,7 @@ print(f"Open cells : {open_cells}  ({100 * open_cells // (W * H)}%)")
 print(f"Wall cells : {wall_cells}")
 
 # ── Generate maze_world.sdf ───────────────────────────────────────────────────
-CELL = 0.6  # metres per grid cell
+CELL = 1.0  # metres per grid cell
 WALL_H = 0.5  # wall height (m)
 WORLD = W * CELL  # 17.4 m
 
@@ -157,7 +157,7 @@ _a("  Gazebo Harmonic maze world")
 _a("  Generated from maze.txt by generate_maze.py (Prim's algorithm, seed 42)")
 _a(f"  Maze:   {W}x{H} cells, cell size {CELL} m")
 _a(f"  World:  {WORLD:.2f} m x {WORLD:.2f} m  (centred at origin)")
-_a("  Hub:    9x9 open staging area at world (0, 0)")
+_a("  Hub:    5x5 open staging area at world (0, 0)")
 _a("-->")
 _a('<sdf version="1.9">')
 _a('  <world name="maze_world">')
@@ -261,7 +261,7 @@ for idx, (lx, ly, sx, sy) in enumerate(wall_runs):
 _a("    </model>")
 _a("")
 _a("    <!--")
-_a("      Robot spawn points (inside central 9x9 hub, facing north yaw=pi/2):")
+_a("      Robot spawn points (inside central 5x5 hub, facing north yaw=pi/2):")
 _a("")
 for i, (sx2, sy2) in enumerate(spawn_pts):
     _a(f'      Robot {i}: x="{sx2:.4f}"  y="{sy2:.4f}"  z="0.05"  yaw="1.5708"')

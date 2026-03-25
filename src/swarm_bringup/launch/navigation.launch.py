@@ -1,9 +1,9 @@
 """
 navigation_launch.py (swarm_bringup override)
 
-Minimal Nav2 bringup for swarm exploration.  Excludes Jazzy-only nodes that are
-not needed (collision_monitor, route_server, docking_server) so we don't have to
-work around their stricter parameter requirements.
+Nav2 bringup for swarm exploration.  Excludes route_server, docking_server,
+smoother_server, and collision_monitor.  The cmd_vel chain is:
+controller → cmd_vel_nav → velocity_smoother → cmd_vel → Gazebo bridge.
 
 Accepts the same arguments as nav2_bringup/launch/navigation_launch.py so
 robot_stack.launch.py doesn't need to change.
@@ -25,7 +25,6 @@ def generate_launch_description():
 
     lifecycle_nodes = [
         "controller_server",
-        "smoother_server",
         "planner_server",
         "behavior_server",
         "velocity_smoother",
@@ -74,14 +73,6 @@ def generate_launch_description():
                         remappings=remappings + [("cmd_vel", "cmd_vel_nav")],
                     ),
                     Node(
-                        package="nav2_smoother",
-                        executable="smoother_server",
-                        name="smoother_server",
-                        output="screen",
-                        parameters=[configured_params],
-                        remappings=remappings,
-                    ),
-                    Node(
                         package="nav2_planner",
                         executable="planner_server",
                         name="planner_server",
@@ -113,13 +104,19 @@ def generate_launch_description():
                         parameters=[configured_params],
                         remappings=remappings,
                     ),
+                    # velocity_smoother subscribes cmd_vel_nav (from controller)
+                    # and publishes directly to cmd_vel (picked up by ros_gz_bridge).
                     Node(
                         package="nav2_velocity_smoother",
                         executable="velocity_smoother",
                         name="velocity_smoother",
                         output="screen",
                         parameters=[configured_params],
-                        remappings=remappings + [("cmd_vel", "cmd_vel_nav")],
+                        remappings=remappings
+                        + [
+                            ("cmd_vel", "cmd_vel_nav"),
+                            ("cmd_vel_smoothed", "cmd_vel"),
+                        ],
                     ),
                     Node(
                         package="nav2_lifecycle_manager",
