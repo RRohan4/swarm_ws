@@ -4,6 +4,8 @@ ROS 2 workspace for multi-robot swarm exploration. Three TurtleBot3 Waffle robot
 
 Written in Python with ROS 2 Jazzy, the codebase includes SLAM, Nav2, a custom frontier detector, and a simple FSM for robot behaviour. The architecture is designed for modularity and scalability to larger swarms.
 
+https://github.com/user-attachments/assets/085da9c2-b8fe-4d9b-aeb3-6b86ffb53e54
+
 ## Dev flow overview
 
 | Step | Tool | Purpose |
@@ -12,8 +14,6 @@ Written in Python with ROS 2 Jazzy, the codebase includes SLAM, Nav2, a custom f
 | Run the simulator | `docker compose` | Builds the sim image and launches the full stack |
 
 The dev container forwards the host Docker socket, so `docker compose` commands work from inside it.
-
-https://github.com/user-attachments/assets/085da9c2-b8fe-4d9b-aeb3-6b86ffb53e54
 
 ---
 
