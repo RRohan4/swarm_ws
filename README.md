@@ -1,6 +1,8 @@
-# Swarm Simulator — Headless Gazebo + Foxglove
+# Coordinated Swarm Exploration with ROS 2
 
-ROS 2 workspace for multi-robot swarm exploration. Three TurtleBot3 Waffle robots autonomously explore a 12×12 m maze using decentralized frontier-based navigation. Gazebo runs headless; Foxglove provides the visualisation UI.
+ROS 2 workspace for multi-robot swarm exploration. Three TurtleBot3 Waffle robots autonomously explore a complex maze using decentralized frontier-based navigation. Gazebo sim runs headless and Foxglove provides the visualisation UI.
+
+Written in Python with ROS 2 Jazzy, the codebase includes SLAM, Nav2, a custom frontier detector, and a simple FSM for robot behaviour. The architecture is designed for modularity and scalability to larger swarms.
 
 ## Dev flow overview
 
