@@ -1,6 +1,6 @@
 # Swarm Simulator — Headless Gazebo + Foxglove
 
-ROS 2 workspace for single- (and eventually multi-) robot swarm exploration. Gazebo runs headless; Foxglove provides the visualisation UI.
+ROS 2 workspace for multi-robot swarm exploration. Three TurtleBot3 Waffle robots autonomously explore a 12×12 m maze using decentralized frontier-based navigation. Gazebo runs headless; Foxglove provides the visualisation UI.
 
 ## Dev flow overview
 
@@ -39,18 +39,30 @@ From the workspace root — either on the host or from a terminal inside the dev
 # Build the sim image (only needed after Dockerfile or dependency changes)
 docker compose build
 
-# Start the sim stack
+# Start the full 3-robot stack
 docker compose up
 ```
 
-This starts the `sim` service which runs:
-- Gazebo Harmonic in headless/server mode
-- TurtleBot3 Waffle spawn
-- ROS ↔ Gazebo topic bridges (`ros_gz_bridge`)
-- SLAM Toolbox (lifecycle managed automatically)
-- Foxglove bridge on `ws://localhost:8765`
+This starts six services:
+
+| Service | What it runs |
+|---------|-------------|
+| `sim` | Gazebo Harmonic headless, clock bridge, 3 × `robot_stack` |
+| `robot_0` | TurtleBot3 Waffle at (0.6, 0.6) — SLAM + Nav2 + FSM |
+| `robot_1` | TurtleBot3 Waffle at (1.8, 0.6) — SLAM + Nav2 + FSM |
+| `robot_2` | TurtleBot3 Waffle at (0.6, 1.8) — SLAM + Nav2 + FSM |
+| `global` | Map merge node + frontier detector |
+| `foxglove` | Foxglove bridge on `ws://localhost:8765` |
 
 Stop with `Ctrl-C` or `docker compose down`.
+
+### Single-robot mode
+
+For regression testing with one robot:
+
+```bash
+docker compose --profile sim_single up
+```
 
 ---
 
@@ -59,16 +71,19 @@ Stop with `Ctrl-C` or `docker compose down`.
 Open [Foxglove](https://app.foxglove.dev/) (Desktop or web):
 
 1. **New connection** → **Foxglove WebSocket** → `ws://localhost:8765`
-2. Set fixed frame to `map`.
+2. Set fixed frame to `world`.
 
 Useful topics:
 
 | Panel | Topic |
 |-------|-------|
-| LaserScan | `/scan` |
-| PointCloud | `/depth/points` |
-| Map | `/map` |
-| Image | `/depth/image` |
+| Map (merged) | `/merged_map` |
+| LaserScan (robot 0) | `/robot_0/scan` |
+| LaserScan (robot 1) | `/robot_1/scan` |
+| LaserScan (robot 2) | `/robot_2/scan` |
+| Frontier markers | `/frontier_markers` |
+| Goal markers | `/robot_N/goal_markers` |
+| Coverage plot | `/robot_N/status` → `map_cells_known` |
 
 A pre-built dashboard layout is in [`config/foxglove/swarm_ws.json`](config/foxglove/swarm_ws.json) — import it via **File → Import layout**.
 
@@ -106,6 +121,7 @@ pre-commit autoupdate
 ## Troubleshooting
 
 - **Port 8765 in use**: stop any process on that port and rerun `docker compose up`.
-- **No map updates**: SLAM starts with timed delays — wait ~15 s after the stack is up.
-- **Robot not moving in map**: send velocity commands via the Foxglove Teleop panel so SLAM receives motion and scan data.
+- **No map updates**: SLAM and the global map merge start with timed delays — wait ~25 s after the stack is up before expecting `/merged_map` or `/frontiers`.
+- **Robots not moving**: the FSM enters EXPLORING only after frontiers appear on `/frontiers`; allow time for SLAM to build initial maps.
 - **Missing ROS packages in sim image**: rebuild with `docker compose build`.
+- **DDS participant index errors**: CycloneDDS is configured with `MaxAutoParticipantIndex: 200` to handle 30+ nodes; if you see index collisions check the `CYCLONEDDS_URI` env var in `compose.yaml`.
