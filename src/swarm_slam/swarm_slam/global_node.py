@@ -1,5 +1,5 @@
 """
-map_merge_node.py
+global_node.py
 
 Global singleton. Subscribes to /robot_N/map (OccupancyGrid) for each robot,
 transforms each map into the world frame using TF, merges with max-confidence
@@ -7,8 +7,8 @@ voting (unknown < free < occupied), and publishes /merged_map.
 Also tracks latest odom poses and publishes /robot_poses.
 
 Parameters:
-  robot_ids       : list[str]  e.g. ["robot_0", "robot_1"]
-  map_merge_rate  : float      publish rate Hz (default 2.0)
+  robot_ids  : list[str]  e.g. ["robot_0", "robot_1"]
+  rate       : float      publish rate Hz (default 2.0)
 """
 
 import math
@@ -19,7 +19,7 @@ from geometry_msgs.msg import Pose, PoseArray, TransformStamped
 from nav_msgs.msg import MapMetaData, OccupancyGrid, Odometry
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
-from std_msgs.msg import Header
+from std_msgs.msg import Header, String
 from tf2_ros import Buffer, TransformListener
 
 # QoS that matches slam_toolbox's latched map topic
@@ -37,19 +37,17 @@ def _yaw_from_quat(q) -> float:
     return math.atan2(siny, cosy)
 
 
-class MapMergeNode(Node):
+class GlobalNode(Node):
     def __init__(self):
-        super().__init__("map_merge_node")
+        super().__init__("global_node")
 
         self.declare_parameter("robot_ids", ["robot_0", "robot_1"])
-        self.declare_parameter("map_merge_rate", 2.0)
+        self.declare_parameter("rate", 2.0)
 
         robot_ids: list[str] = (
             self.get_parameter("robot_ids").get_parameter_value().string_array_value
         )
-        rate: float = (
-            self.get_parameter("map_merge_rate").get_parameter_value().double_value
-        )
+        rate: float = self.get_parameter("rate").get_parameter_value().double_value
 
         self._robot_ids = robot_ids
         self._maps: dict[str, OccupancyGrid] = {}
@@ -76,9 +74,10 @@ class MapMergeNode(Node):
 
         self._merged_pub = self.create_publisher(OccupancyGrid, "/merged_map", MAP_QOS)
         self._poses_pub = self.create_publisher(PoseArray, "/robot_poses", 10)
+        self._ids_pub = self.create_publisher(String, "/robot_ids", MAP_QOS)
 
         self.create_timer(1.0 / rate, self._publish)
-        self.get_logger().info(f"map_merge_node started — tracking {robot_ids}")
+        self.get_logger().info(f"global_node started — tracking {robot_ids}")
 
     # ── Callbacks ─────────────────────────────────────────────────────────────
 
@@ -86,6 +85,7 @@ class MapMergeNode(Node):
         self._maps[robot_id] = msg
 
     def _odom_cb(self, robot_id: str, msg: Odometry) -> None:
+        # Store raw odom pose (in robot_N/odom frame); transformed to world in _publish.
         self._poses[robot_id] = msg.pose.pose
 
     # ── TF helpers ────────────────────────────────────────────────────────────
@@ -116,10 +116,42 @@ class MapMergeNode(Node):
         if merged is not None:
             self._merged_pub.publish(merged)
 
-        if self._poses:
+        # Broadcast robot ID list so FSM nodes can discover peers dynamically.
+        self._ids_pub.publish(String(data=",".join(self._robot_ids)))
+
+        # Publish robot poses in world frame, in robot_ids order.
+        world_poses: list[Pose] = []
+        for rid in self._robot_ids:
+            if rid not in self._poses:
+                continue
+            raw = self._poses[rid]
+            # Transform odom-frame position into world frame via TF.
+            try:
+                tf: TransformStamped = self._tf_buf.lookup_transform(
+                    "world", f"{rid}/odom", rclpy.time.Time()
+                )
+                t = tf.transform.translation
+                yaw = _yaw_from_quat(tf.transform.rotation)
+                cos_y = math.cos(yaw)
+                sin_y = math.sin(yaw)
+                ox = raw.position.x
+                oy = raw.position.y
+                p = Pose()
+                p.position.x = t.x + cos_y * ox - sin_y * oy
+                p.position.y = t.y + sin_y * ox + cos_y * oy
+                p.position.z = raw.position.z
+                p.orientation = raw.orientation
+                world_poses.append(p)
+            except Exception as e:
+                self.get_logger().warn(
+                    f"TF world→{rid}/odom unavailable: {e}",
+                    throttle_duration_sec=10.0,
+                )
+                world_poses.append(raw)  # fall back to raw odom if TF not ready
+        if world_poses:
             pa = PoseArray()
             pa.header = Header(stamp=self.get_clock().now().to_msg(), frame_id="world")
-            pa.poses = list(self._poses.values())
+            pa.poses = world_poses
             self._poses_pub.publish(pa)
 
     def _merge_maps(self) -> OccupancyGrid | None:
@@ -248,7 +280,7 @@ class MapMergeNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = MapMergeNode()
+    node = GlobalNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

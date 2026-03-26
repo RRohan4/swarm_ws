@@ -29,7 +29,6 @@ def generate_launch_description():
         "behavior_server",
         "velocity_smoother",
         "bt_navigator",
-        "waypoint_follower",
     ]
 
     # No TF remapping needed — robot frames are namespaced (robot_0/*, robot_1/*)
@@ -92,14 +91,6 @@ def generate_launch_description():
                         package="nav2_bt_navigator",
                         executable="bt_navigator",
                         name="bt_navigator",
-                        output="screen",
-                        parameters=[configured_params],
-                        remappings=remappings,
-                    ),
-                    Node(
-                        package="nav2_waypoint_follower",
-                        executable="waypoint_follower",
-                        name="waypoint_follower",
                         output="screen",
                         parameters=[configured_params],
                         remappings=remappings,

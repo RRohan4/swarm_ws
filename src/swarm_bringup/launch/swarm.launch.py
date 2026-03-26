@@ -58,6 +58,16 @@ def launch_setup(context, *args, **kwargs):
             cmd=["gz", "sim", "-r", "-s", world],
             output="screen",
         ),
+        # ── Clock bridge — must run exactly once; all sim-time nodes block
+        # until /clock is published from Gazebo via this bridge.
+        Node(
+            package="ros_gz_bridge",
+            executable="parameter_bridge",
+            name="gz_clock_bridge",
+            arguments=["/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock"],
+            parameters=[{"use_sim_time": False}],
+            output="screen",
+        ),
         # ── Foxglove bridge (singleton, global) ───────────────────────────────
         TimerAction(
             period=5.0,
@@ -80,6 +90,7 @@ def launch_setup(context, *args, **kwargs):
                 PythonLaunchDescriptionSource(robot_stack_launch),
                 launch_arguments={
                     "robot_id": robot_id,
+                    "robot_ids": ",".join(robot_ids),
                     "x": pose["x"],
                     "y": pose["y"],
                     "z": pose["z"],
@@ -88,20 +99,20 @@ def launch_setup(context, *args, **kwargs):
             )
         )
 
-    # ── Global nodes (Phase 3+) ────────────────────────────────────────────────
+    # ── Global nodes (map merge + frontier detector) ───────────────────────────
     actions.append(
         TimerAction(
             period=15.0,
             actions=[
                 Node(
                     package="swarm_slam",
-                    executable="map_merge_node",
-                    name="map_merge_node",
+                    executable="global_node",
+                    name="global_node",
                     parameters=[
                         {
                             "use_sim_time": True,
                             "robot_ids": robot_ids,
-                            "map_merge_rate": 2.0,
+                            "rate": 2.0,
                         }
                     ],
                     output="screen",
@@ -110,7 +121,6 @@ def launch_setup(context, *args, **kwargs):
         )
     )
 
-    # ── Phase 4: frontier detector ─────────────────────────────────────────────
     actions.append(
         TimerAction(
             period=25.0,
@@ -131,52 +141,6 @@ def launch_setup(context, *args, **kwargs):
             ],
         )
     )
-
-    # ── Phase 6: coordinator ───────────────────────────────────────────────────
-    actions.append(
-        TimerAction(
-            period=25.0,
-            actions=[
-                Node(
-                    package="swarm_exploration",
-                    executable="coordinator_node",
-                    name="coordinator_node",
-                    parameters=[
-                        {
-                            "use_sim_time": True,
-                            "robot_ids": robot_ids,
-                            "rate": 1.0,
-                        }
-                    ],
-                    output="screen",
-                ),
-            ],
-        )
-    )
-
-    # ── Phase 5: per-robot FSM ─────────────────────────────────────────────────
-    for robot_id in robot_ids:
-        actions.append(
-            TimerAction(
-                period=25.0,
-                actions=[
-                    Node(
-                        package="swarm_exploration",
-                        executable="robot_fsm_node",
-                        name=f"robot_fsm_{robot_id}",
-                        parameters=[
-                            {
-                                "use_sim_time": True,
-                                "robot_id": robot_id,
-                                "status_rate": 2.0,
-                                "goal_timeout": 60.0,
-                            }
-                        ],
-                        output="screen",
-                    ),
-                ],
-            )
-        )
 
     return actions
 
@@ -199,7 +163,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "num_robots",
-                default_value="2",
+                default_value="3",
                 description="Number of robots to spawn",
             ),
             OpaqueFunction(function=launch_setup),

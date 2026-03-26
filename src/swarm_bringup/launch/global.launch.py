@@ -1,13 +1,13 @@
 """
-map_merge.launch.py
+global.launch.py
 
-Launches global singleton nodes: map_merge_node, frontier_detector_node,
-coordinator_node.  Run as a single compose service after the robot stacks
-are up.
+Launches global singleton nodes: global_node (map merge) and
+frontier_detector_node.  Run as a single compose service after the robot
+stacks are up.
 
 Args:
   robot_ids  : comma-separated robot IDs, e.g. "robot_0,robot_1" (default)
-  rate       : merge publish rate Hz (default 2.0)
+  rate       : map merge publish rate Hz (default 2.0)
 """
 
 from launch import LaunchDescription
@@ -22,21 +22,19 @@ def launch_setup(context, *args, **kwargs):
     robot_ids = [r.strip() for r in ids_str.split(",")]
 
     return [
-        # ── Phase 3: map merge ─────────────────────────────────────────────────
         Node(
             package="swarm_slam",
-            executable="map_merge_node",
-            name="map_merge_node",
+            executable="global_node",
+            name="global_node",
             parameters=[
                 {
                     "use_sim_time": True,
                     "robot_ids": robot_ids,
-                    "map_merge_rate": rate,
+                    "rate": rate,
                 }
             ],
             output="screen",
         ),
-        # ── Phase 4: frontier detector ─────────────────────────────────────────
         Node(
             package="swarm_exploration",
             executable="frontier_detector_node",
@@ -50,27 +48,13 @@ def launch_setup(context, *args, **kwargs):
             ],
             output="screen",
         ),
-        # ── Phase 6: coordinator ───────────────────────────────────────────────
-        Node(
-            package="swarm_exploration",
-            executable="coordinator_node",
-            name="coordinator_node",
-            parameters=[
-                {
-                    "use_sim_time": True,
-                    "robot_ids": robot_ids,
-                    "rate": 1.0,
-                }
-            ],
-            output="screen",
-        ),
     ]
 
 
 def generate_launch_description():
     return LaunchDescription(
         [
-            DeclareLaunchArgument("robot_ids", default_value="robot_0,robot_1"),
+            DeclareLaunchArgument("robot_ids", default_value="robot_0,robot_1,robot_2"),
             DeclareLaunchArgument("rate", default_value="2.0"),
             OpaqueFunction(function=launch_setup),
         ]

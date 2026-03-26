@@ -70,6 +70,24 @@ def _write_bridge_config(robot_id: str) -> str:
             "gz_type_name": "gz.msgs.Pose_V",
             "direction": "GZ_TO_ROS",
         },
+        # RGB camera image
+        {
+            "ros_topic_name": f"/{robot_id}/camera/image_raw",
+            "gz_topic_name": f"/{robot_id}/camera/image_raw",
+            "ros_type_name": "sensor_msgs/msg/Image",
+            "gz_type_name": "gz.msgs.Image",
+            "direction": "GZ_TO_ROS",
+        },
+        # RGB camera info — Gazebo publishes on /{robot_id}/camera/camera_info
+        # (no image_raw prefix). Remap to {image_topic}/camera_info on the ROS
+        # side so Foxglove's Camera panel and image_transport find it automatically.
+        {
+            "ros_topic_name": f"/{robot_id}/camera/image_raw/camera_info",
+            "gz_topic_name": f"/{robot_id}/camera/camera_info",
+            "ros_type_name": "sensor_msgs/msg/CameraInfo",
+            "gz_type_name": "gz.msgs.CameraInfo",
+            "direction": "GZ_TO_ROS",
+        },
     ]
     tmp = tempfile.NamedTemporaryFile(
         mode="w", suffix=f"_{robot_id}_bridge.yaml", delete=False

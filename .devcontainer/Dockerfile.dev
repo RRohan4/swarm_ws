@@ -40,6 +40,9 @@ ENV PATH="/opt/prettier/node_modules/.bin:${PATH}"
 # NODE_PATH lets prettier resolve "@prettier/plugin-xml" from the baked-in location
 ENV NODE_PATH="/opt/prettier/node_modules"
 
+# Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code
+
 # Python linting / type-checking / pre-commit
 RUN pip3 install --no-cache-dir --break-system-packages ruff mypy pre-commit
 

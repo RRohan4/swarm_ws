@@ -14,12 +14,12 @@ setup(
     zip_safe=True,
     maintainer="Sean Yang",
     maintainer_email="sean@seanyang.me",
-    description="Global map merge node for swarm exploration",
+    description="Global singleton node for swarm exploration",
     license="Apache-2.0",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "map_merge_node = swarm_slam.map_merge_node:main",
+            "global_node = swarm_slam.global_node:main",
         ],
     },
 )

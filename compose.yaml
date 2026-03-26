@@ -1,14 +1,28 @@
+x-base: &base
+  build: .
+  network_mode: host
+  ipc: host
+  environment: &base-env
+    GZ_IP: "127.0.0.1"
+    ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
+    RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    # CycloneDDS default caps auto-assigned participant indices at 0–99 (100
+    # total). With 3 robots × ~8 Nav2 nodes each plus SLAM, bridges, global
+    # nodes and FSM nodes all sharing domain 0 on the same host we blow through
+    # that limit, causing "Failed to find a free participant index" crashes.
+    # Raise MaxAutoParticipantIndex to 200 to give ample headroom.
+    CYCLONEDDS_URI: "<CycloneDDS><Domain><Discovery><MaxAutoParticipantIndex>200</MaxAutoParticipantIndex></Discovery></Domain></CycloneDDS>"
+  volumes:
+    - /dev/shm:/dev/shm
+
 services:
-  # ── Gazebo simulation ────────────────────────────────────────────────────────
+  # ── Gazebo + clock bridge ─────────────────────────────────────────────────────
   sim:
-    build: .
-    network_mode: host
-    ipc: host
+    <<: *base
     environment:
-      - DISPLAY=${DISPLAY:-:0}
-      - QT_X11_NO_MITSHM=1
-      - GZ_IP=127.0.0.1
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+      <<: *base-env
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: "1"
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/shm:/dev/shm
@@ -16,68 +30,59 @@ services:
       bash -c ". /ws/install/setup.sh &&
                ros2 launch swarm_bringup gazebo.launch.py"
 
-  # ── Robot stacks ─────────────────────────────────────────────────────────────
+  # ── Robot stacks — to add a robot: copy a block, increment id and position ───
   robot_0:
-    build: .
-    network_mode: host
-    ipc: host
+    <<: *base
     environment:
-      - SWARM_ROBOT_ID=robot_0
-      - SWARM_X=0.6
-      - SWARM_Y=0.6
-      - SWARM_YAW=1.5708
-      - GZ_IP=127.0.0.1
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-    volumes:
-      - /dev/shm:/dev/shm
+      <<: *base-env
+      SWARM_ROBOT_ID: robot_0
+      SWARM_X: "0.6"
+      SWARM_Y: "0.6"
+      SWARM_YAW: "1.5708"
     command: >
       bash -c ". /ws/install/setup.sh &&
-               ros2 launch swarm_bringup robot_stack.launch.py
-               robot_id:=robot_0 x:=0.6 y:=0.6 z:=0.05 yaw:=1.5708"
+               ros2 launch swarm_bringup robot_stack.launch.py"
     depends_on: [sim]
 
   robot_1:
-    build: .
-    network_mode: host
-    ipc: host
+    <<: *base
     environment:
-      - SWARM_ROBOT_ID=robot_1
-      - SWARM_X=0.0
-      - SWARM_Y=0.6
-      - SWARM_YAW=1.5708
-      - GZ_IP=127.0.0.1
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-    volumes:
-      - /dev/shm:/dev/shm
+      <<: *base-env
+      SWARM_ROBOT_ID: robot_1
+      SWARM_X: "1.8"
+      SWARM_Y: "0.6"
+      SWARM_YAW: "1.5708"
     command: >
       bash -c ". /ws/install/setup.sh &&
-               ros2 launch swarm_bringup robot_stack.launch.py
-               robot_id:=robot_1 x:=1.8 y:=0.6 z:=0.05 yaw:=1.5708"
+               ros2 launch swarm_bringup robot_stack.launch.py"
     depends_on: [sim]
 
-  # ── Global nodes ─────────────────────────────────────────────────────────────
-  map_merge:
-    build: .
-    network_mode: host
-    ipc: host
+  robot_2:
+    <<: *base
     environment:
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-    volumes:
-      - /dev/shm:/dev/shm
+      <<: *base-env
+      SWARM_ROBOT_ID: robot_2
+      SWARM_X: "0.6"
+      SWARM_Y: "1.8"
+      SWARM_YAW: "1.5708"
     command: >
       bash -c ". /ws/install/setup.sh &&
-               ros2 launch swarm_bringup map_merge.launch.py
-               robot_ids:=robot_0,robot_1"
-    depends_on: [robot_0, robot_1]
+               ros2 launch swarm_bringup robot_stack.launch.py"
+    depends_on: [sim]
 
+  # ── Global nodes (map merge + frontier detector) ──────────────────────────────
+  # To add a robot: update robot_ids and add it to depends_on
+  global:
+    <<: *base
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_bringup global.launch.py
+               robot_ids:=robot_0,robot_1,robot_2"
+    depends_on: [robot_0, robot_1, robot_2]
+
+  # ── Foxglove bridge ───────────────────────────────────────────────────────────
   foxglove:
-    build: .
-    network_mode: host
-    ipc: host
-    environment:
-      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
-    volumes:
-      - /dev/shm:/dev/shm
+    <<: *base
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 run foxglove_bridge foxglove_bridge
@@ -86,12 +91,11 @@ services:
 
   # ── Single-robot regression (Phase 0) ────────────────────────────────────────
   sim_single:
-    build: .
-    network_mode: host
-    ipc: host
+    <<: *base
     environment:
-      - DISPLAY=${DISPLAY:-:0}
-      - QT_X11_NO_MITSHM=1
+      <<: *base-env
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: "1"
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/shm:/dev/shm

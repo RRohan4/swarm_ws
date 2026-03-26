@@ -34,18 +34,18 @@
 
     <!-- Scene -->
     <scene>
-      <ambient>0.4 0.4 0.4 1</ambient>
-      <background>0.15 0.15 0.15 1</background>
+      <ambient>0.5 0.5 0.5 1</ambient>
+      <background>0.3 0.4 0.55 1</background>
       <shadows>true</shadows>
       <grid>false</grid>
     </scene>
 
-    <!-- Sun -->
+    <!-- Sun — warm-tinted so R≠G≠B and cameras produce visible color -->
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
       <pose>0 0 20 0 0 0</pose>
-      <diffuse>0.9 0.9 0.9 1</diffuse>
-      <specular>0.3 0.3 0.3 1</specular>
+      <diffuse>1.0 0.95 0.8 1</diffuse>
+      <specular>0.4 0.4 0.3 1</specular>
       <attenuation>
         <range>1000</range>
         <constant>0.9</constant>
@@ -72,8 +72,8 @@
             <plane><normal>0 0 1</normal><size>500 500</size></plane>
           </geometry>
           <material>
-            <ambient>0.25 0.25 0.25 1</ambient>
-            <diffuse>0.25 0.25 0.25 1</diffuse>
+            <ambient>0.35 0.28 0.20 1</ambient>
+            <diffuse>0.55 0.45 0.30 1</diffuse>
           </material>
         </visual>
       </link>
@@ -94,9 +94,9 @@
         <visual name="vis">
           <geometry><box><size>29.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -112,9 +112,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -130,9 +130,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -148,9 +148,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -166,9 +166,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -184,9 +184,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -202,9 +202,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -220,9 +220,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -238,9 +238,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -256,9 +256,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -274,9 +274,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -292,9 +292,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -310,9 +310,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -328,9 +328,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -346,9 +346,9 @@
         <visual name="vis">
           <geometry><box><size>7.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -364,9 +364,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -382,9 +382,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -400,9 +400,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -418,9 +418,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -436,9 +436,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -454,9 +454,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -472,9 +472,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -490,9 +490,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -508,9 +508,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -526,9 +526,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -544,9 +544,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -562,9 +562,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -580,9 +580,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -598,9 +598,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -616,9 +616,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -634,9 +634,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -652,9 +652,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -670,9 +670,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -688,9 +688,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -706,9 +706,9 @@
         <visual name="vis">
           <geometry><box><size>11.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -724,9 +724,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -742,9 +742,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -760,9 +760,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -778,9 +778,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -796,9 +796,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -814,9 +814,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -832,9 +832,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -850,9 +850,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -868,9 +868,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -886,9 +886,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -904,9 +904,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -922,9 +922,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -940,9 +940,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -958,9 +958,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -976,9 +976,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -994,9 +994,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1012,9 +1012,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1030,9 +1030,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1048,9 +1048,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1066,9 +1066,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1084,9 +1084,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1102,9 +1102,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1120,9 +1120,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1138,9 +1138,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1156,9 +1156,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1174,9 +1174,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1192,9 +1192,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1210,9 +1210,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1228,9 +1228,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1246,9 +1246,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1264,9 +1264,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1282,9 +1282,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1300,9 +1300,9 @@
         <visual name="vis">
           <geometry><box><size>9.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1318,9 +1318,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1336,9 +1336,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1354,9 +1354,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1372,9 +1372,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1390,9 +1390,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1408,9 +1408,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1426,9 +1426,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1444,9 +1444,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1462,9 +1462,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1480,9 +1480,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1498,9 +1498,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1516,9 +1516,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1534,9 +1534,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1552,9 +1552,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1570,9 +1570,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1588,9 +1588,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1606,9 +1606,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1624,9 +1624,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1642,9 +1642,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1660,9 +1660,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1678,9 +1678,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1696,9 +1696,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1714,9 +1714,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1732,9 +1732,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1750,9 +1750,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1768,9 +1768,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1786,9 +1786,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1804,9 +1804,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1822,9 +1822,9 @@
         <visual name="vis">
           <geometry><box><size>11.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1840,9 +1840,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1858,9 +1858,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1876,9 +1876,9 @@
         <visual name="vis">
           <geometry><box><size>7.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1894,9 +1894,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1912,9 +1912,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1930,9 +1930,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1948,9 +1948,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1966,9 +1966,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -1984,9 +1984,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2002,9 +2002,9 @@
         <visual name="vis">
           <geometry><box><size>2.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2020,9 +2020,9 @@
         <visual name="vis">
           <geometry><box><size>4.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2038,9 +2038,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2056,9 +2056,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2074,9 +2074,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2092,9 +2092,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2110,9 +2110,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2128,9 +2128,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2146,9 +2146,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2164,9 +2164,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2182,9 +2182,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2200,9 +2200,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2218,9 +2218,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2236,9 +2236,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2254,9 +2254,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2272,9 +2272,9 @@
         <visual name="vis">
           <geometry><box><size>4.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2290,9 +2290,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2308,9 +2308,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2326,9 +2326,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2344,9 +2344,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2362,9 +2362,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2380,9 +2380,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2398,9 +2398,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2416,9 +2416,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2434,9 +2434,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2452,9 +2452,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2470,9 +2470,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2488,9 +2488,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2506,9 +2506,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2524,9 +2524,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2542,9 +2542,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2560,9 +2560,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2578,9 +2578,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2596,9 +2596,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2614,9 +2614,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2632,9 +2632,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2650,9 +2650,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2668,9 +2668,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2686,9 +2686,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2704,9 +2704,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2722,9 +2722,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2740,9 +2740,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2758,9 +2758,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2776,9 +2776,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2794,9 +2794,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2812,9 +2812,9 @@
         <visual name="vis">
           <geometry><box><size>7.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2830,9 +2830,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2848,9 +2848,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2866,9 +2866,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2884,9 +2884,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2902,9 +2902,9 @@
         <visual name="vis">
           <geometry><box><size>7.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2920,9 +2920,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2938,9 +2938,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2956,9 +2956,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2974,9 +2974,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -2992,9 +2992,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3010,9 +3010,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3028,9 +3028,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3046,9 +3046,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3064,9 +3064,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3082,9 +3082,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3100,9 +3100,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3118,9 +3118,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3136,9 +3136,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3154,9 +3154,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3172,9 +3172,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3190,9 +3190,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3208,9 +3208,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3226,9 +3226,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3244,9 +3244,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3262,9 +3262,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3280,9 +3280,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3298,9 +3298,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3316,9 +3316,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3334,9 +3334,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3352,9 +3352,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3370,9 +3370,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3388,9 +3388,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3406,9 +3406,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3424,9 +3424,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3442,9 +3442,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3460,9 +3460,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3478,9 +3478,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3496,9 +3496,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3514,9 +3514,9 @@
         <visual name="vis">
           <geometry><box><size>5.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3532,9 +3532,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3550,9 +3550,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3568,9 +3568,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3586,9 +3586,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3604,9 +3604,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3622,9 +3622,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3640,9 +3640,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3658,9 +3658,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3676,9 +3676,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3694,9 +3694,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3712,9 +3712,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3730,9 +3730,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3748,9 +3748,9 @@
         <visual name="vis">
           <geometry><box><size>7.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3766,9 +3766,9 @@
         <visual name="vis">
           <geometry><box><size>9.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3784,9 +3784,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3802,9 +3802,9 @@
         <visual name="vis">
           <geometry><box><size>3.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3820,9 +3820,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3838,9 +3838,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3856,9 +3856,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3874,9 +3874,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3892,9 +3892,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3910,9 +3910,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3928,9 +3928,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3946,9 +3946,9 @@
         <visual name="vis">
           <geometry><box><size>1.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
@@ -3964,9 +3964,9 @@
         <visual name="vis">
           <geometry><box><size>29.00000 1.00000 0.50000</size></box></geometry>
           <material>
-            <ambient>0.55 0.55 0.55 1</ambient>
-            <diffuse>0.55 0.55 0.55 1</diffuse>
-            <specular>0.1 0.1 0.1 1</specular>
+            <ambient>0.45 0.45 0.55 1</ambient>
+            <diffuse>0.70 0.70 0.85 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
           </material>
         </visual>
       </link>
