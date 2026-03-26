@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Generate a 29×29 orthogonal swarm-exploration maze.
+"""Generate a 21×21 orthogonal swarm-exploration maze.
 
 Structure:
   - 5×5 open central staging area
   - Surrounding maze carved with Prim's randomised algorithm (grows outward)
-  - Walls and corridors are 1 cell wide throughout
+  - Walls and corridors are 1 cell wide throughout (1.5 m per cell)
 
 Output: maze.txt       ('#' = wall, ' ' = open)
         maze_world.sdf (Gazebo Harmonic world, centred at origin)
@@ -13,7 +13,7 @@ Output: maze.txt       ('#' = wall, ' ' = open)
 import random
 
 SEED = 42
-W, H = 29, 29
+W, H = 21, 21
 CX, CY = W // 2, H // 2  # (14, 14)
 HUB_HALF = 2  # hub covers rows/cols CY±2  →  5×5
 
@@ -32,11 +32,11 @@ for r in range(CY - HUB_HALF, CY + HUB_HALF + 1):
         carve(r, c)
 
 # ── Prim's maze generation ────────────────────────────────────────────────────
-# Cells in the logical maze grid sit at odd grid positions: 1, 3, …, 27  (14 each)
-# Cell (i, j) in [0,13]² maps to grid position (2i+1, 2j+1).
-# The hub occupies cell rows/cols 6-7 (grid rows/cols 12-16).
+# Cells in the logical maze grid sit at odd grid positions: 1, 3, …, 19  (10 each)
+# Cell (i, j) in [0,9]² maps to grid position (2i+1, 2j+1).
+# The hub occupies cell rows/cols 4-5 (grid rows/cols 8-12).
 
-NUM_CELLS = 14  # cells per dimension
+NUM_CELLS = 10  # cells per dimension
 
 
 def cell_to_grid(i: int, j: int) -> tuple[int, int]:
@@ -110,7 +110,7 @@ print(f"Open cells : {open_cells}  ({100 * open_cells // (W * H)}%)")
 print(f"Wall cells : {wall_cells}")
 
 # ── Generate maze_world.sdf ───────────────────────────────────────────────────
-CELL = 1.0  # metres per grid cell
+CELL = 1.5  # metres per grid cell
 WALL_H = 0.5  # wall height (m)
 WORLD = W * CELL  # 17.4 m
 
