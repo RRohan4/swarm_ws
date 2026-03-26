@@ -61,6 +61,8 @@ BLACKLIST_TTL = 120.0
 # If no frontier centroid is within this distance of the current target,
 # the target is considered resolved (mapped) and navigation is cancelled.
 FRONTIER_VANISHED_DIST = 1.0
+# If robot is farther than this from the anchor, fall back to robot-position scoring
+ANCHOR_MAX_DIST = 10.0
 
 MAP_QOS = QoSProfile(
     depth=1,
@@ -121,6 +123,7 @@ class RobotFSMNode(Node):
         self._last_assign_pos: Point | None = None  # robot position at last assignment
         self._blacklist: list[tuple[Point, float]] = []
         self._assign_needed = False  # set True when frontiers arrive while WAITING
+        self._anchor_pos: Point | None = None  # last successfully reached frontier
 
         # Nav2 action client
         self._nav_client = ActionClient(
@@ -300,6 +303,12 @@ class RobotFSMNode(Node):
         from action_msgs.msg import GoalStatus
 
         if status == GoalStatus.STATUS_SUCCEEDED:
+            if self._current_target is not None:
+                self._anchor_pos = Point(
+                    x=self._current_target.pose.position.x,
+                    y=self._current_target.pose.position.y,
+                    z=0.0,
+                )
             self.get_logger().info(f"[{self._robot_id}] Reached frontier")
         else:
             # Blacklist the target if it still exists in the frontier list
@@ -396,6 +405,15 @@ class RobotFSMNode(Node):
         my_dists, my_parent = self._bfs_ground_distances(self._my_pos)
         my_start_cell = self._world_to_grid(self._my_pos)
 
+        # Anchor BFS: score frontiers by distance from last visited frontier
+        # to promote area-sweeping instead of ping-ponging.
+        anchor_dists: dict[tuple[int, int], float] | None = None
+        if self._anchor_pos is not None:
+            if _dist(self._anchor_pos, self._my_pos) <= ANCHOR_MAX_DIST:
+                anchor_dists, _ = self._bfs_ground_distances(self._anchor_pos)
+                if not anchor_dists:
+                    anchor_dists = None
+
         # BFS from each peer's current goal — used for goal-separation scoring.
         # We do NOT run BFS from peer robot positions; separation is goal-based.
         peer_goal_dists: dict[str, dict[tuple[int, int], float]] = {}
@@ -428,7 +446,8 @@ class RobotFSMNode(Node):
         best_f = max(
             candidates,
             key=lambda f: self._score(
-                f, my_dists, my_parent, my_start_cell, peer_goal_dists
+                f, my_dists, my_parent, my_start_cell, peer_goal_dists,
+                anchor_dists,
             ),
         )
 
@@ -453,6 +472,7 @@ class RobotFSMNode(Node):
             my_parent,
             my_start_cell,
             peer_goal_dists,
+            anchor_dists,
         )
         self.get_logger().info(
             f"[{self._robot_id}] self-assigned → "
@@ -475,6 +495,7 @@ class RobotFSMNode(Node):
         my_parent: dict[tuple[int, int], tuple[int, int]],
         my_start_cell: tuple[int, int] | None,
         peer_goal_dists: dict[str, dict[tuple[int, int], float]],
+        anchor_dists: dict[tuple[int, int], float] | None = None,
     ) -> float:
         """Score a frontier for this robot.
 
@@ -512,9 +533,18 @@ class RobotFSMNode(Node):
         # Using ((1+cos)/2)^2 rather than a linear ramp gives a steep curve
         # so small heading deviations are nearly free but large turns are
         # severely penalised.
-        gd: float = my_dists.get(f_cell) if f_cell else None  # type: ignore[assignment]
-        if gd is None:
-            gd = euc * 1.4
+        if anchor_dists is not None and f_cell is not None:
+            gd: float = anchor_dists.get(f_cell)  # type: ignore[assignment]
+            if gd is None:
+                gd = (
+                    _dist(self._anchor_pos, frontier.centroid) * 1.4
+                    if self._anchor_pos is not None
+                    else euc * 1.4
+                )
+        else:
+            gd: float = my_dists.get(f_cell) if f_cell else None  # type: ignore[assignment]
+            if gd is None:
+                gd = euc * 1.4
 
         heading_factor = 1.0  # default: no penalty when heading is unknown
         if self._last_heading is not None and my_start_cell is not None:
