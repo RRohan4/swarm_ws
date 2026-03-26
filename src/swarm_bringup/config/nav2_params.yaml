@@ -97,7 +97,7 @@ local_costmap:
       width: 3
       height: 3
       resolution: 0.05
-      robot_radius: 0.22
+      robot_radius: 0.30
       plugins: ["obstacle_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
@@ -127,7 +127,7 @@ global_costmap:
       global_frame: robot_id_placeholder/map
       robot_base_frame: robot_id_placeholder/base_footprint
       use_sim_time: true
-      robot_radius: 0.22
+      robot_radius: 0.30
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "inflation_layer"]
