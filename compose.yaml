@@ -7,7 +7,7 @@ x-base: &base
     ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
     RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
     # CycloneDDS default caps auto-assigned participant indices at 0–99 (100
-    # total). With 3 robots × ~8 Nav2 nodes each plus SLAM, bridges, global
+    # total). With 4 robots × ~8 Nav2 nodes each plus SLAM, bridges, global
     # nodes and FSM nodes all sharing domain 0 on the same host we blow through
     # that limit, causing "Failed to find a free participant index" crashes.
     # Raise MaxAutoParticipantIndex to 200 to give ample headroom.
@@ -70,15 +70,27 @@ services:
                ros2 launch swarm_bringup robot_stack.launch.py"
     depends_on: [sim]
 
+  robot_3:
+    <<: *base
+    environment:
+      <<: *base-env
+      SWARM_ROBOT_ID: robot_3
+      SWARM_X: "1.8"
+      SWARM_Y: "1.8"
+      SWARM_YAW: "1.5708"
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_bringup robot_stack.launch.py"
+    depends_on: [sim]
+
   # ── Global nodes (map merge + frontier detector) ──────────────────────────────
   # To add a robot: update robot_ids and add it to depends_on
   global:
     <<: *base
     command: >
       bash -c ". /ws/install/setup.sh &&
-               ros2 launch swarm_bringup global.launch.py
-               robot_ids:=robot_0,robot_1,robot_2"
-    depends_on: [robot_0, robot_1, robot_2]
+               ros2 launch swarm_bringup global.launch.py robot_ids:=robot_0,robot_1,robot_2,robot_3"
+    depends_on: [robot_0, robot_1, robot_2, robot_3]
 
   # ── Foxglove bridge ───────────────────────────────────────────────────────────
   foxglove:

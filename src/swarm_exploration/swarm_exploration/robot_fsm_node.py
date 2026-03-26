@@ -20,14 +20,11 @@ Publications:
   /robot_N/goal    (geometry_msgs/PoseStamped) — this robot's current goal
 
 Scoring (local, ground-distance based):
-  score = sqrt(cluster_size) * proximity * heading_bonus
-          * separation_from_robot_positions
-          * separation_from_robot_goals
+  score = proximity * heading_bonus * separation_from_robot_goals
 
-  - proximity:   1 / max(ground_dist_to_frontier, 0.5)
-  - heading:     0.3 + 0.7 * (1 + cos θ) / 2   →  [0.3 .. 1.0]
-  - separation:  product over peers of (1 - exp(-dist / 4.0))
-                 applied separately for each peer's position AND goal
+  - proximity:    1 / max(ground_dist_to_frontier, 0.5)
+  - heading:      ((1 + cos θ) / 2)²  →  [0.02 .. 1.0]  (inflates effective gd)
+  - separation:   1 - exp(-min_peer_goal_dist / 4.0)  →  [0 .. 1)
 
 Parameters:
   robot_id        : str        (default "robot_0")
@@ -446,7 +443,11 @@ class RobotFSMNode(Node):
         best_f = max(
             candidates,
             key=lambda f: self._score(
-                f, my_dists, my_parent, my_start_cell, peer_goal_dists,
+                f,
+                my_dists,
+                my_parent,
+                my_start_cell,
+                peer_goal_dists,
                 anchor_dists,
             ),
         )
@@ -562,10 +563,11 @@ class RobotFSMNode(Node):
         score = 1.0 / max(effective_gd, 0.5)
 
         # ── 3. Goal separation (global secondary) ────────────────────────
-        # Raw ground distance to nearest peer goal as a direct multiplier —
-        # never saturates, so a frontier 20 m from all peer goals scores 4×
-        # better than one 5 m away regardless of proximity.
+        # Soft exponential penalty bounded to [0, 1] so it can never dominate
+        # proximity.  A frontier right on top of a peer goal scores ~0; one
+        # 4 m away scores 0.63; beyond ~12 m the penalty is negligible (~0.95).
         # Omitted when no peer goals are known so the first robot is unaffected.
+        _GOAL_SEP_SCALE = 4.0  # metres; half-saturation point
         if peer_goal_dists:
             min_goal_sep = float("inf")
             for peer_id, goal_dists in peer_goal_dists.items():
@@ -578,7 +580,7 @@ class RobotFSMNode(Node):
                         else 100.0
                     )
                 min_goal_sep = min(min_goal_sep, sep)
-            score *= min_goal_sep
+            score *= 1.0 - math.exp(-min_goal_sep / _GOAL_SEP_SCALE)
 
         return score
 
