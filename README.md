@@ -13,6 +13,8 @@ Written in Python with ROS 2 Jazzy, the codebase includes SLAM, Nav2, a custom f
 
 The dev container forwards the host Docker socket, so `docker compose` commands work from inside it.
 
+https://github.com/user-attachments/assets/085da9c2-b8fe-4d9b-aeb3-6b86ffb53e54
+
 ---
 
 ## 1. Open in Dev Container
