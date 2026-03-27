@@ -10,8 +10,8 @@ and publishes:
 Parameters:
   min_frontier_size  : int    minimum cluster size to publish (default 5)
   detect_rate        : float  Hz (default 2.0)
-  merge_distance     : float  frontiers with centroids within this distance (m) are merged (default 0.3)
-  min_unknown_backing: int    minimum unique unknown neighbor cells for a cluster to be kept (default 10)
+  merge_distance     : float  merge centroids within this distance metres (default 0.3)
+  min_unknown_backing: int    minimum unique unknown neighbours per cluster (default 10)
 """
 
 import numpy as np
@@ -52,7 +52,9 @@ class FrontierDetectorNode(Node):
             self.get_parameter("merge_distance").get_parameter_value().double_value
         )
         self._min_unknown_backing: int = (
-            self.get_parameter("min_unknown_backing").get_parameter_value().integer_value
+            self.get_parameter("min_unknown_backing")
+            .get_parameter_value()
+            .integer_value
         )
 
         self._latest_map: OccupancyGrid | None = None
@@ -102,35 +104,53 @@ class FrontierDetectorNode(Node):
         labeled, num_features = ndimage.label(frontier_mask)
 
         frontiers: list[Frontier] = []
-        for label_id in range(1, num_features + 1):
-            cells = np.argwhere(labeled == label_id)  # (row, col)
-            if len(cells) < self._min_size:
-                continue
+        if num_features > 0:
+            # Collect all frontier cell positions in one pass — avoids the
+            # O(K×N) cost of calling np.argwhere(labeled == id) per cluster.
+            rows, cols = np.where(frontier_mask)
+            cell_labels = labeled[rows, cols]
 
-            # Count unique unknown cells adjacent to this frontier cluster
-            unknown_neighbors = set()
-            for r, c in cells:
-                for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-                    nr, nc = r + dr, c + dc
-                    if 0 <= nr < h and 0 <= nc < w and unknown[nr, nc]:
-                        unknown_neighbors.add((nr, nc))
-            if len(unknown_neighbors) < self._min_unknown_backing:
-                continue
+            # Sort once by label so clusters form contiguous slices.
+            order = np.argsort(cell_labels, kind="stable")
+            rows = rows[order]
+            cols = cols[order]
+            cell_labels = cell_labels[order]
 
-            # Snap centroid to nearest frontier cell (medoid) so it's always reachable
-            mean_row = cells[:, 0].mean()
-            mean_col = cells[:, 1].mean()
-            dists_to_mean = (cells[:, 0] - mean_row) ** 2 + (cells[:, 1] - mean_col) ** 2
-            best_idx = np.argmin(dists_to_mean)
-            cx = ox + (cells[best_idx, 1] + 0.5) * res
-            cy = oy + (cells[best_idx, 0] + 0.5) * res
+            boundaries = np.flatnonzero(np.diff(cell_labels)) + 1
+            groups_r = np.split(rows, boundaries)
+            groups_c = np.split(cols, boundaries)
 
-            f = Frontier()
-            f.centroid = Point(x=cx, y=cy, z=0.0)
-            f.cluster_size = len(cells)
-            f.info_score = 0.0  # filled by coordinator
-            f.assigned_to = ""
-            frontiers.append(f)
+            for cells_r, cells_c in zip(groups_r, groups_c):
+                if len(cells_r) < self._min_size:
+                    continue
+
+                # Vectorised unknown-neighbor count (replaces nested Python loop)
+                nr = np.concatenate([cells_r - 1, cells_r + 1, cells_r, cells_r])
+                nc = np.concatenate([cells_c, cells_c, cells_c - 1, cells_c + 1])
+                in_bounds = (nr >= 0) & (nr < h) & (nc >= 0) & (nc < w)
+                nr, nc = nr[in_bounds], nc[in_bounds]
+                is_unk = unknown[nr, nc]
+                unique_unk = (
+                    len(np.unique(np.column_stack([nr[is_unk], nc[is_unk]]), axis=0))
+                    if is_unk.any()
+                    else 0
+                )
+                if unique_unk < self._min_unknown_backing:
+                    continue
+
+                # Snap centroid to nearest frontier cell (medoid)
+                mean_r = cells_r.mean()
+                mean_c = cells_c.mean()
+                best = np.argmin((cells_r - mean_r) ** 2 + (cells_c - mean_c) ** 2)
+                cx = ox + (cells_c[best] + 0.5) * res
+                cy = oy + (cells_r[best] + 0.5) * res
+
+                f = Frontier()
+                f.centroid = Point(x=cx, y=cy, z=0.0)
+                f.cluster_size = len(cells_r)
+                f.info_score = 0.0  # filled by coordinator
+                f.assigned_to = ""
+                frontiers.append(f)
 
         frontiers = self._merge_nearby(frontiers)
 
@@ -155,7 +175,7 @@ class FrontierDetectorNode(Node):
             for m in merged:
                 dx = f.centroid.x - m.centroid.x
                 dy = f.centroid.y - m.centroid.y
-                if dx * dx + dy * dy <= self._merge_distance ** 2:
+                if dx * dx + dy * dy <= self._merge_distance**2:
                     # Absorb into existing — keep larger's centroid, sum sizes
                     m.cluster_size += f.cluster_size
                     absorbed = True

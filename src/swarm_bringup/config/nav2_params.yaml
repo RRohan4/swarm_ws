@@ -106,6 +106,8 @@ local_costmap:
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: true
+        footprint_clearing_enabled: true
+        combination_method: 1
         observation_sources: scan
         scan:
           topic: /robot_id_placeholder/scan

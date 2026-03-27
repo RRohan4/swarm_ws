@@ -43,7 +43,7 @@ def launch_setup(context, *args, **kwargs):
                 {
                     "use_sim_time": True,
                     "min_frontier_size": 5,
-                    "detect_rate": 2.0,
+                    "detect_rate": 5.0,
                 }
             ],
             output="screen",

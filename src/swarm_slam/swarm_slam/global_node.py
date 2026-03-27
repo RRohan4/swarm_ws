@@ -248,17 +248,20 @@ class GlobalNode(Node):
             di = mi[valid]
             dj = mj[valid]
 
-            # Max-confidence merge: unknown < free < occupied
-            known = src != -1
-            dst_unknown = merged[di[known], dj[known]] == -1
-            # Free overwrites unknown
-            idx_free = known.copy()
-            idx_free[known] = dst_unknown
-            merged[di[idx_free], dj[idx_free]] = src[idx_free]
-
-            # Occupied always wins
+            # Merge priority: free > occupied > unknown.
+            # Occupied only fills unknown cells — it cannot override confirmed
+            # free space.  Free space is authoritative and overwrites occupied,
+            # so ghost obstacles left by moving robots are cleared as soon as
+            # any robot's raytrace sweeps through the vacated area.
+            # Real walls are never marked free (no ray penetrates them), so
+            # they accumulate occupied votes from multiple robots and remain.
             occupied = src == 100
-            merged[di[occupied], dj[occupied]] = 100
+            dst_unknown = merged[di[occupied], dj[occupied]] == -1
+            occ_idx = np.where(occupied)[0]
+            merged[di[occ_idx[dst_unknown]], dj[occ_idx[dst_unknown]]] = 100
+
+            free = src == 0
+            merged[di[free], dj[free]] = 0
 
         out = OccupancyGrid()
         out.header = Header(

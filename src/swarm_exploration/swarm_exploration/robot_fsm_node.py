@@ -170,7 +170,10 @@ class RobotFSMNode(Node):
             MarkerArray, f"/{self._robot_id}/goal_markers", 10
         )
 
-        self.create_timer(1.0 / rate, self._tick)
+        # Assignment loop runs at 10 Hz so the robot reacts quickly after a
+        # goal completes.  Status is published at the user-configured rate.
+        self.create_timer(0.1, self._tick)
+        self.create_timer(1.0 / rate, self._publish_status)
         self.get_logger().info(
             f"robot_fsm_node started for {self._robot_id} (awaiting peer list)"
         )
@@ -352,7 +355,6 @@ class RobotFSMNode(Node):
 
         if self._state == EXPLORING:
             self._publish_goal_markers()
-        self._publish_status()
 
     # ── Local self-assignment ──────────────────────────────────────────────────
 
@@ -371,16 +373,16 @@ class RobotFSMNode(Node):
         # BFS from anchor (last reached frontier) for sweep bias;
         # fall back to robot position if no anchor yet.
         rank_origin = self._anchor_pos if self._anchor_pos is not None else self._my_pos
-        rank_dists, _ = self._bfs_ground_distances(rank_origin)
+        rank_dists = self._bfs_ground_distances(rank_origin)
         # If anchor BFS produced no results (anchor in now-occupied cell),
         # fall back to robot position.
-        if not rank_dists and self._anchor_pos is not None:
+        if rank_dists is None and self._anchor_pos is not None:
             rank_origin = self._my_pos
-            rank_dists, _ = self._bfs_ground_distances(self._my_pos)
+            rank_dists = self._bfs_ground_distances(self._my_pos)
 
         # Geodesic Voronoi partition
-        partition = self._multi_source_bfs_partition()
-        my_cells = partition.get(self._robot_id, set())
+        owner, rid_to_idx = self._multi_source_bfs_partition()
+        my_idx = rid_to_idx.get(self._robot_id, -1)
 
         candidates = [
             f
@@ -399,21 +401,25 @@ class RobotFSMNode(Node):
             return
 
         # Split into frontiers within our Voronoi partition and all candidates
-        my_frontiers = [
-            f for f in candidates
-            if self._world_to_grid(f.centroid) in my_cells
-        ]
+        def _owner_of(f: Frontier) -> int:
+            cell = self._world_to_grid(f.centroid)
+            if cell is None or owner.size == 0:
+                return 0
+            return int(owner[cell[0], cell[1]])
+
+        my_frontiers = [f for f in candidates if _owner_of(f) == my_idx]
 
         pool = my_frontiers if my_frontiers else candidates
 
         # Pick closest by ground distance from rank origin (anchor or robot pos)
-        best_f = min(
-            pool,
-            key=lambda f: rank_dists.get(
-                self._world_to_grid(f.centroid),
-                _dist(self._my_pos, f.centroid) * 1.4,
-            ),
-        )
+        def _rank_dist(f: Frontier) -> float:
+            cell = self._world_to_grid(f.centroid)
+            if rank_dists is None or cell is None:
+                return _dist(self._my_pos, f.centroid) * 1.4
+            d = float(rank_dists[cell[0], cell[1]])
+            return d if d != np.inf else _dist(self._my_pos, f.centroid) * 1.4
+
+        best_f = min(pool, key=_rank_dist)
 
         # Build and send goal
         stamp = self.get_clock().now().to_msg()
@@ -430,11 +436,12 @@ class RobotFSMNode(Node):
         # Announce goal to peers before navigating
         self._goal_pub.publish(ps)
 
-        gd = rank_dists.get(
-            self._world_to_grid(best_f.centroid),
-            _dist(self._my_pos, best_f.centroid) * 1.4,
+        gd = _rank_dist(best_f)
+        origin_tag = (
+            "anchor"
+            if rank_origin is self._anchor_pos and self._anchor_pos is not None
+            else "robot-pos"
         )
-        origin_tag = "anchor" if rank_origin is self._anchor_pos and self._anchor_pos is not None else "robot-pos"
         in_partition = "partition" if my_frontiers else "global-fallback"
         self.get_logger().info(
             f"[{self._robot_id}] self-assigned → "
@@ -449,7 +456,6 @@ class RobotFSMNode(Node):
 
     def _is_blacklisted(self, centroid: Point) -> bool:
         return any(_dist(pt, centroid) < BLACKLIST_DIST for pt, _ in self._blacklist)
-
 
     # ── Ground distance helpers ───────────────────────────────────────────────
 
@@ -466,87 +472,91 @@ class RobotFSMNode(Node):
             return (row, col)
         return None
 
-    def _bfs_ground_distances(
-        self, start: Point
-    ) -> tuple[dict[tuple[int, int], float], dict[tuple[int, int], tuple[int, int]]]:
+    def _bfs_ground_distances(self, start: Point) -> np.ndarray | None:
         """BFS wavefront from ``start`` on the merged occupancy grid.
 
-        Returns ``(dist, parent)`` where:
-          - ``dist[cell]``   = ground distance in metres from start cell
-          - ``parent[cell]`` = predecessor cell on the shortest path from start
+        Returns a float32 array shaped (h, w) where each cell holds the
+        geodesic distance in metres from the start cell.  Unreachable cells
+        hold ``np.inf``.  Returns ``None`` when the map or start is unavailable.
 
-        Both dicts are empty (not None) when the map isn't available yet, so
-        callers can always treat the result as a valid pair.
+        Uses numpy arrays for distance storage to avoid the overhead of
+        Python dict tuple-key hashing on every neighbour visit.
         """
         m = self._merged_map
         if m is None:
-            return {}, {}
+            return None
 
         start_cell = self._world_to_grid(start)
         if start_cell is None:
-            return {}, {}
+            return None
 
         w = m.info.width
         h = m.info.height
         res = m.info.resolution
-        grid = np.array(m.data, dtype=np.int8).reshape((h, w))
+        grid = np.asarray(m.data, dtype=np.int8).reshape((h, w))
 
-        passable = grid == 0
+        passable = (grid == 0).copy()
         sr, sc = start_cell
         passable[sr, sc] = True
 
-        dist: dict[tuple[int, int], float] = {start_cell: 0.0}
-        parent: dict[tuple[int, int], tuple[int, int]] = {}
-        q: deque[tuple[int, int]] = deque()
-        q.append(start_cell)
+        # inf marks unvisited; set distance before enqueuing so each cell is
+        # added at most once (avoids the queue explosion that occurs when using
+        # nd < dist[nr, nc] with a plain deque instead of a priority queue).
+        dist = np.full((h, w), np.inf, dtype=np.float32)
+        dist[sr, sc] = 0.0
 
-        neighbours = [
-            (-1, 0, 1.0),
-            (1, 0, 1.0),
-            (0, -1, 1.0),
-            (0, 1, 1.0),
-            (-1, -1, 1.414),
-            (-1, 1, 1.414),
-            (1, -1, 1.414),
-            (1, 1, 1.414),
-        ]
+        q: deque[tuple[int, int]] = deque()
+        q.append((sr, sc))
+
+        diag = res * 1.414
 
         while q:
             r, c = q.popleft()
-            d0 = dist[(r, c)]
-            for dr, dc, cost_mul in neighbours:
-                nr, nc = r + dr, c + dc
-                if 0 <= nr < h and 0 <= nc < w and passable[nr, nc]:
-                    nd = d0 + res * cost_mul
-                    key = (nr, nc)
-                    if key not in dist:
-                        dist[key] = nd
-                        parent[key] = (r, c)
-                        q.append(key)
+            d0 = dist[r, c]
+            for nr, nc, step in (
+                (r - 1, c, res),
+                (r + 1, c, res),
+                (r, c - 1, res),
+                (r, c + 1, res),
+                (r - 1, c - 1, diag),
+                (r - 1, c + 1, diag),
+                (r + 1, c - 1, diag),
+                (r + 1, c + 1, diag),
+            ):
+                if (
+                    0 <= nr < h
+                    and 0 <= nc < w
+                    and passable[nr, nc]
+                    and dist[nr, nc] == np.inf
+                ):
+                    dist[nr, nc] = d0 + step
+                    q.append((nr, nc))
 
-        return dist, parent
+        return dist
 
-    def _multi_source_bfs_partition(self) -> dict[str, set[tuple[int, int]]]:
+    def _multi_source_bfs_partition(self) -> tuple[np.ndarray, dict[str, int]]:
         """Geodesic Voronoi partition of the merged map.
 
         Seeds a BFS from every robot position simultaneously.  Each cell is
-        claimed by whichever robot's wavefront reaches it first.  Expanding
+        claimed by whichever robot's wavefront reaches it first.  Expands
         over both free AND unknown cells so that frontier cells (which sit on
         the free/unknown boundary) are reachable.
+
+        Returns ``(owner, rid_to_idx)`` where:
+          - ``owner``      shape (h, w) int16 — cell value is the owning robot's
+                           index (1-based); 0 = unclaimed
+          - ``rid_to_idx`` maps robot_id → owner index
         """
         m = self._merged_map
         if m is None:
-            return {}
+            return np.zeros((0, 0), dtype=np.int16), {}
 
         w = m.info.width
         h = m.info.height
-        grid = np.array(m.data, dtype=np.int8).reshape((h, w))
+        grid = np.asarray(m.data, dtype=np.int8).reshape((h, w))
 
-        # Passable = free (0) or unknown (-1)
         passable = (grid == 0) | (grid == -1)
 
-        # Collect all robot positions (self + peers)
-        # Map each robot to an integer index for the owner array.
         seeds: list[tuple[str, tuple[int, int]]] = []
         my_cell = self._world_to_grid(self._my_pos)
         if my_cell is not None:
@@ -557,11 +567,10 @@ class RobotFSMNode(Node):
                 seeds.append((peer_id, cell))
 
         if not seeds:
-            return {}
+            return np.zeros((h, w), dtype=np.int16), {}
 
-        rid_to_idx = {rid: i + 1 for i, (rid, _) in enumerate(seeds)}
+        rid_to_idx: dict[str, int] = {rid: i + 1 for i, (rid, _) in enumerate(seeds)}
 
-        # owner array: 0 = unclaimed, positive int = robot index
         owner = np.zeros((h, w), dtype=np.int16)
         q: deque[tuple[int, int]] = deque()
 
@@ -570,28 +579,29 @@ class RobotFSMNode(Node):
                 owner[sr, sc] = rid_to_idx[rid]
                 q.append((sr, sc))
 
-        neighbours = [
-            (-1, 0), (1, 0), (0, -1), (0, 1),
-            (-1, -1), (-1, 1), (1, -1), (1, 1),
-        ]
-
         while q:
             r, c = q.popleft()
             oid = owner[r, c]
-            for dr, dc in neighbours:
-                nr, nc = r + dr, c + dc
-                if 0 <= nr < h and 0 <= nc < w and passable[nr, nc] and owner[nr, nc] == 0:
+            for nr, nc in (
+                (r - 1, c),
+                (r + 1, c),
+                (r, c - 1),
+                (r, c + 1),
+                (r - 1, c - 1),
+                (r - 1, c + 1),
+                (r + 1, c - 1),
+                (r + 1, c + 1),
+            ):
+                if (
+                    0 <= nr < h
+                    and 0 <= nc < w
+                    and passable[nr, nc]
+                    and owner[nr, nc] == 0
+                ):
                     owner[nr, nc] = oid
                     q.append((nr, nc))
 
-        # Build partition dict using numpy indexing per robot
-        partition: dict[str, set[tuple[int, int]]] = {}
-        for rid, _ in seeds:
-            idx = rid_to_idx[rid]
-            rows, cols = np.where(owner == idx)
-            partition[rid] = set(zip(rows.tolist(), cols.tolist()))
-
-        return partition
+        return owner, rid_to_idx
 
     # ── Status and visualization publishing ───────────────────────────────────
 
