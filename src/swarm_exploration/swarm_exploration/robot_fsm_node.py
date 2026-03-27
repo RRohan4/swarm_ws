@@ -114,6 +114,7 @@ class RobotFSMNode(Node):
         # Local assignment state
         self._blacklist: list[tuple[Point, float]] = []
         self._assign_needed = False  # set True when frontiers arrive while WAITING
+        self._anchor_pos: Point | None = None  # last successfully reached frontier
 
         # Nav2 action client
         self._nav_client = ActionClient(
@@ -284,6 +285,12 @@ class RobotFSMNode(Node):
         from action_msgs.msg import GoalStatus
 
         if status == GoalStatus.STATUS_SUCCEEDED:
+            if self._current_target is not None:
+                self._anchor_pos = Point(
+                    x=self._current_target.pose.position.x,
+                    y=self._current_target.pose.position.y,
+                    z=0.0,
+                )
             self.get_logger().info(f"[{self._robot_id}] Reached frontier")
         else:
             # Blacklist the target if it still exists in the frontier list
@@ -361,8 +368,15 @@ class RobotFSMNode(Node):
             (pt, t) for pt, t in self._blacklist if now - t < BLACKLIST_TTL
         ]
 
-        # BFS from own position for ground distances
-        my_dists, _ = self._bfs_ground_distances(self._my_pos)
+        # BFS from anchor (last reached frontier) for sweep bias;
+        # fall back to robot position if no anchor yet.
+        rank_origin = self._anchor_pos if self._anchor_pos is not None else self._my_pos
+        rank_dists, _ = self._bfs_ground_distances(rank_origin)
+        # If anchor BFS produced no results (anchor in now-occupied cell),
+        # fall back to robot position.
+        if not rank_dists and self._anchor_pos is not None:
+            rank_origin = self._my_pos
+            rank_dists, _ = self._bfs_ground_distances(self._my_pos)
 
         # Geodesic Voronoi partition
         partition = self._multi_source_bfs_partition()
@@ -392,10 +406,10 @@ class RobotFSMNode(Node):
 
         pool = my_frontiers if my_frontiers else candidates
 
-        # Pick closest by ground distance
+        # Pick closest by ground distance from rank origin (anchor or robot pos)
         best_f = min(
             pool,
-            key=lambda f: my_dists.get(
+            key=lambda f: rank_dists.get(
                 self._world_to_grid(f.centroid),
                 _dist(self._my_pos, f.centroid) * 1.4,
             ),
@@ -416,15 +430,16 @@ class RobotFSMNode(Node):
         # Announce goal to peers before navigating
         self._goal_pub.publish(ps)
 
-        gd = my_dists.get(
+        gd = rank_dists.get(
             self._world_to_grid(best_f.centroid),
             _dist(self._my_pos, best_f.centroid) * 1.4,
         )
+        origin_tag = "anchor" if rank_origin is self._anchor_pos and self._anchor_pos is not None else "robot-pos"
         in_partition = "partition" if my_frontiers else "global-fallback"
         self.get_logger().info(
             f"[{self._robot_id}] self-assigned → "
             f"({best_f.centroid.x:.2f}, {best_f.centroid.y:.2f}) "
-            f"gd={gd:.1f} [{in_partition}]"
+            f"gd={gd:.1f} [{in_partition}] [{origin_tag}]"
         )
 
         if self._nav2_ready:
