@@ -4,7 +4,7 @@ robot_fsm_node.py
 Per-robot finite-state machine that drives autonomous exploration.
 
 States:
-  WAITING    (1) — no target assigned; scores and self-assigns frontiers
+  WAITING    (1) — no target assigned; self-assigns frontiers
   EXPLORING  (0) — navigating to an assigned frontier via Nav2 NavigateToPose
   DONE       (2) — no more frontiers (frontier list becomes empty)
 
@@ -13,18 +13,17 @@ Subscriptions:
   /merged_map                  (nav_msgs/OccupancyGrid) — BFS ground-distance
   /frontiers                   (swarm_msgs/FrontierArray)
   /robot_poses                 (geometry_msgs/PoseArray) — all robot positions
-  /robot_M/goal                (geometry_msgs/PoseStamped) — each peer's goal
 
 Publications:
   /robot_N/status  (swarm_msgs/RobotStatus)
   /robot_N/goal    (geometry_msgs/PoseStamped) — this robot's current goal
 
-Scoring (local, ground-distance based):
-  score = proximity * heading_bonus * separation_from_robot_goals
-
-  - proximity:    1 / max(ground_dist_to_frontier, 0.5)
-  - heading:      ((1 + cos θ) / 2)²  →  [0.02 .. 1.0]  (inflates effective gd)
-  - separation:   1 - exp(-min_peer_goal_dist / 4.0)  →  [0 .. 1)
+Coordination:
+  Geodesic Voronoi partitioning using all robot positions on the merged map.
+  Multi-source BFS from every robot simultaneously; each cell is owned by the
+  robot whose wavefront reaches it first (geodesic nearest).  Within its own
+  partition a robot picks the closest frontier by ground distance.  If the
+  partition contains no frontiers, falls back to the globally closest frontier.
 
 Parameters:
   robot_id        : str        (default "robot_0")
@@ -58,8 +57,6 @@ BLACKLIST_TTL = 120.0
 # If no frontier centroid is within this distance of the current target,
 # the target is considered resolved (mapped) and navigation is cancelled.
 FRONTIER_VANISHED_DIST = 1.0
-# If robot is farther than this from the anchor, fall back to robot-position scoring
-ANCHOR_MAX_DIST = 10.0
 
 MAP_QOS = QoSProfile(
     depth=1,
@@ -110,17 +107,13 @@ class RobotFSMNode(Node):
         self._frontiers_ever_received = False
         self._merged_map: OccupancyGrid | None = None
 
-        # Peer awareness (for separation penalty)
+        # Peer awareness
         self._my_pos: Point | None = None  # own position
         self._peer_poses: dict[str, Point] = {}  # peer robot positions
-        self._peer_goals: dict[str, Point] = {}  # peer robots' current goals
 
         # Local assignment state
-        self._last_heading: tuple[float, float] | None = None
-        self._last_assign_pos: Point | None = None  # robot position at last assignment
         self._blacklist: list[tuple[Point, float]] = []
         self._assign_needed = False  # set True when frontiers arrive while WAITING
-        self._anchor_pos: Point | None = None  # last successfully reached frontier
 
         # Nav2 action client
         self._nav_client = ActionClient(
@@ -207,17 +200,8 @@ class RobotFSMNode(Node):
         for peer_id in ids:
             if peer_id == self._robot_id or peer_id in self._subscribed_peers:
                 continue
-            self.create_subscription(
-                PoseStamped,
-                f"/{peer_id}/goal",
-                lambda m, r=peer_id: self._peer_goal_cb(r, m),
-                10,
-            )
             self._subscribed_peers.add(peer_id)
             self.get_logger().info(f"[{self._robot_id}] discovered peer {peer_id}")
-
-    def _peer_goal_cb(self, peer_id: str, msg: PoseStamped) -> None:
-        self._peer_goals[peer_id] = msg.pose.position
 
     def _frontiers_cb(self, msg: FrontierArray) -> None:
         self._frontiers = list(msg.frontiers)
@@ -300,12 +284,6 @@ class RobotFSMNode(Node):
         from action_msgs.msg import GoalStatus
 
         if status == GoalStatus.STATUS_SUCCEEDED:
-            if self._current_target is not None:
-                self._anchor_pos = Point(
-                    x=self._current_target.pose.position.x,
-                    y=self._current_target.pose.position.y,
-                    z=0.0,
-                )
             self.get_logger().info(f"[{self._robot_id}] Reached frontier")
         else:
             # Blacklist the target if it still exists in the frontier list
@@ -383,41 +361,12 @@ class RobotFSMNode(Node):
             (pt, t) for pt, t in self._blacklist if now - t < BLACKLIST_TTL
         ]
 
-        # Update incoming direction from actual displacement since last assignment.
-        # This captures where the robot physically came FROM, which is more reliable
-        # than the BFS path direction computed at assignment time (which doesn't
-        # account for the robot's actual path through the maze).
-        if self._last_assign_pos is not None:
-            dx = self._my_pos.x - self._last_assign_pos.x
-            dy = self._my_pos.y - self._last_assign_pos.y
-            d = math.sqrt(dx * dx + dy * dy)
-            if d > 0.5:  # only update if robot actually moved
-                self._last_heading = (dx / d, dy / d)
-        self._last_assign_pos = Point(
-            x=self._my_pos.x, y=self._my_pos.y, z=self._my_pos.z
-        )
+        # BFS from own position for ground distances
+        my_dists, _ = self._bfs_ground_distances(self._my_pos)
 
-        # BFS from own position — gives exact ground distances AND parent map
-        # for path-direction heading bonus.
-        my_dists, my_parent = self._bfs_ground_distances(self._my_pos)
-        my_start_cell = self._world_to_grid(self._my_pos)
-
-        # Anchor BFS: score frontiers by distance from last visited frontier
-        # to promote area-sweeping instead of ping-ponging.
-        anchor_dists: dict[tuple[int, int], float] | None = None
-        if self._anchor_pos is not None:
-            if _dist(self._anchor_pos, self._my_pos) <= ANCHOR_MAX_DIST:
-                anchor_dists, _ = self._bfs_ground_distances(self._anchor_pos)
-                if not anchor_dists:
-                    anchor_dists = None
-
-        # BFS from each peer's current goal — used for goal-separation scoring.
-        # We do NOT run BFS from peer robot positions; separation is goal-based.
-        peer_goal_dists: dict[str, dict[tuple[int, int], float]] = {}
-        for peer_id, peer_goal in self._peer_goals.items():
-            d, _ = self._bfs_ground_distances(peer_goal)
-            if d:
-                peer_goal_dists[peer_id] = d
+        # Geodesic Voronoi partition
+        partition = self._multi_source_bfs_partition()
+        my_cells = partition.get(self._robot_id, set())
 
         candidates = [
             f
@@ -433,22 +382,22 @@ class RobotFSMNode(Node):
                 if _dist(self._my_pos, f.centroid) >= MIN_DISPATCH_DIST
             ]
         if not candidates:
-            # All remaining frontiers are within MIN_DISPATCH_DIST of this
-            # robot.  The map is still growing — stay WAITING and let the next
-            # frontier update trigger a fresh attempt when farther frontiers
-            # appear.  Do not go DONE here: only an empty frontier list (after
-            # having seen real frontiers) means exploration is complete.
             return
 
-        best_f = max(
-            candidates,
-            key=lambda f: self._score(
-                f,
-                my_dists,
-                my_parent,
-                my_start_cell,
-                peer_goal_dists,
-                anchor_dists,
+        # Split into frontiers within our Voronoi partition and all candidates
+        my_frontiers = [
+            f for f in candidates
+            if self._world_to_grid(f.centroid) in my_cells
+        ]
+
+        pool = my_frontiers if my_frontiers else candidates
+
+        # Pick closest by ground distance
+        best_f = min(
+            pool,
+            key=lambda f: my_dists.get(
+                self._world_to_grid(f.centroid),
+                _dist(self._my_pos, f.centroid) * 1.4,
             ),
         )
 
@@ -467,18 +416,15 @@ class RobotFSMNode(Node):
         # Announce goal to peers before navigating
         self._goal_pub.publish(ps)
 
-        final_score = self._score(
-            best_f,
-            my_dists,
-            my_parent,
-            my_start_cell,
-            peer_goal_dists,
-            anchor_dists,
+        gd = my_dists.get(
+            self._world_to_grid(best_f.centroid),
+            _dist(self._my_pos, best_f.centroid) * 1.4,
         )
+        in_partition = "partition" if my_frontiers else "global-fallback"
         self.get_logger().info(
             f"[{self._robot_id}] self-assigned → "
             f"({best_f.centroid.x:.2f}, {best_f.centroid.y:.2f}) "
-            f"score={final_score:.3f}"
+            f"gd={gd:.1f} [{in_partition}]"
         )
 
         if self._nav2_ready:
@@ -489,100 +435,6 @@ class RobotFSMNode(Node):
     def _is_blacklisted(self, centroid: Point) -> bool:
         return any(_dist(pt, centroid) < BLACKLIST_DIST for pt, _ in self._blacklist)
 
-    def _score(
-        self,
-        frontier: Frontier,
-        my_dists: dict[tuple[int, int], float],
-        my_parent: dict[tuple[int, int], tuple[int, int]],
-        my_start_cell: tuple[int, int] | None,
-        peer_goal_dists: dict[str, dict[tuple[int, int], float]],
-        anchor_dists: dict[tuple[int, int], float] | None = None,
-    ) -> float:
-        """Score a frontier for this robot.
-
-        Priority order:
-          1. Proximity  — ground distance from this robot to the frontier
-                          (primary, most important metric).
-          2. Goal separation — minimum ground distance from this frontier
-                          to any peer robot's current goal.  Used as a raw
-                          multiplier (not a soft exponential penalty) so that
-                          it discriminates globally across the whole map and
-                          cannot be saturated by moderate distances.
-                          Only applied when at least one peer goal is known.
-          3. Heading    — alignment between the robot's incoming travel
-                          direction and the BFS first-step toward this
-                          frontier.  Range [0.05, 1.0]; a backward frontier
-                          needs to be ~20× closer to win over a forward one.
-        """
-        f_cell = self._world_to_grid(frontier.centroid)
-        euc = (
-            _dist(self._my_pos, frontier.centroid) if self._my_pos is not None else 1.0
-        )
-
-        # ── 1. Effective distance = gd inflated by heading change cost ───
-        # Heading is a navigation-cost modifier, not an information modifier,
-        # so it belongs inside the distance term rather than alongside cluster
-        # size.  We compute an effective ground distance:
-        #
-        #   effective_gd = gd / heading_factor
-        #
-        # where heading_factor ∈ [0.02, 1.0]:
-        #   • 0°  (straight ahead)  → factor 1.00 → no penalty
-        #   • 90° (side turn)       → factor 0.25 → 4× effective distance
-        #   • 180° (U-turn)         → factor 0.02 → 50× effective distance
-        #
-        # Using ((1+cos)/2)^2 rather than a linear ramp gives a steep curve
-        # so small heading deviations are nearly free but large turns are
-        # severely penalised.
-        if anchor_dists is not None and f_cell is not None:
-            gd: float = anchor_dists.get(f_cell)  # type: ignore[assignment]
-            if gd is None:
-                gd = (
-                    _dist(self._anchor_pos, frontier.centroid) * 1.4
-                    if self._anchor_pos is not None
-                    else euc * 1.4
-                )
-        else:
-            gd: float = my_dists.get(f_cell) if f_cell else None  # type: ignore[assignment]
-            if gd is None:
-                gd = euc * 1.4
-
-        heading_factor = 1.0  # default: no penalty when heading is unknown
-        if self._last_heading is not None and my_start_cell is not None:
-            path_dir = self._initial_path_dir(my_start_cell, f_cell, my_parent)
-            if path_dir is not None:
-                cos_angle = (
-                    self._last_heading[0] * path_dir[0]
-                    + self._last_heading[1] * path_dir[1]
-                )
-                heading_factor = max(0.02, ((1.0 + cos_angle) / 2.0) ** 2)
-
-        effective_gd = gd / heading_factor
-
-        # ── 2. Primary score: 1 / effective distance ─────────────────────
-        score = 1.0 / max(effective_gd, 0.5)
-
-        # ── 3. Goal separation (global secondary) ────────────────────────
-        # Soft exponential penalty bounded to [0, 1] so it can never dominate
-        # proximity.  A frontier right on top of a peer goal scores ~0; one
-        # 4 m away scores 0.63; beyond ~12 m the penalty is negligible (~0.95).
-        # Omitted when no peer goals are known so the first robot is unaffected.
-        _GOAL_SEP_SCALE = 4.0  # metres; half-saturation point
-        if peer_goal_dists:
-            min_goal_sep = float("inf")
-            for peer_id, goal_dists in peer_goal_dists.items():
-                sep = goal_dists.get(f_cell)
-                if sep is None:
-                    peer_goal = self._peer_goals.get(peer_id)
-                    sep = (
-                        _dist(frontier.centroid, peer_goal) * 1.4
-                        if peer_goal
-                        else 100.0
-                    )
-                min_goal_sep = min(min_goal_sep, sep)
-            score *= 1.0 - math.exp(-min_goal_sep / _GOAL_SEP_SCALE)
-
-        return score
 
     # ── Ground distance helpers ───────────────────────────────────────────────
 
@@ -659,40 +511,72 @@ class RobotFSMNode(Node):
 
         return dist, parent
 
-    def _initial_path_dir(
-        self,
-        start_cell: tuple[int, int] | None,
-        target_cell: tuple[int, int] | None,
-        parent: dict[tuple[int, int], tuple[int, int]],
-    ) -> tuple[float, float] | None:
-        """Return the world-frame unit vector of the first step from start
-        toward target along the BFS shortest path.
+    def _multi_source_bfs_partition(self) -> dict[str, set[tuple[int, int]]]:
+        """Geodesic Voronoi partition of the merged map.
 
-        Traces back through ``parent`` from target until we reach a cell
-        whose parent is ``start_cell``.  That cell is the first step.
-        The direction (col_delta, row_delta) maps to (x, y) in world frame
-        because ``col = (x - ox) / res`` and ``row = (y - oy) / res``.
+        Seeds a BFS from every robot position simultaneously.  Each cell is
+        claimed by whichever robot's wavefront reaches it first.  Expanding
+        over both free AND unknown cells so that frontier cells (which sit on
+        the free/unknown boundary) are reachable.
         """
-        if start_cell is None or target_cell is None or target_cell not in parent:
-            return None
-        if target_cell == start_cell:
-            return None
+        m = self._merged_map
+        if m is None:
+            return {}
 
-        cell = target_cell
-        while True:
-            p = parent.get(cell)
-            if p is None:
-                return None
-            if p == start_cell:
-                break  # cell is the first step away from start
-            cell = p
+        w = m.info.width
+        h = m.info.height
+        grid = np.array(m.data, dtype=np.int8).reshape((h, w))
 
-        dr = cell[0] - start_cell[0]  # row delta → world y
-        dc = cell[1] - start_cell[1]  # col delta → world x
-        norm = math.sqrt(dc * dc + dr * dr)
-        if norm < 1e-6:
-            return None
-        return (dc / norm, dr / norm)  # (x, y) unit vector
+        # Passable = free (0) or unknown (-1)
+        passable = (grid == 0) | (grid == -1)
+
+        # Collect all robot positions (self + peers)
+        # Map each robot to an integer index for the owner array.
+        seeds: list[tuple[str, tuple[int, int]]] = []
+        my_cell = self._world_to_grid(self._my_pos)
+        if my_cell is not None:
+            seeds.append((self._robot_id, my_cell))
+        for peer_id, peer_pos in self._peer_poses.items():
+            cell = self._world_to_grid(peer_pos)
+            if cell is not None:
+                seeds.append((peer_id, cell))
+
+        if not seeds:
+            return {}
+
+        rid_to_idx = {rid: i + 1 for i, (rid, _) in enumerate(seeds)}
+
+        # owner array: 0 = unclaimed, positive int = robot index
+        owner = np.zeros((h, w), dtype=np.int16)
+        q: deque[tuple[int, int]] = deque()
+
+        for rid, (sr, sc) in seeds:
+            if owner[sr, sc] == 0:
+                owner[sr, sc] = rid_to_idx[rid]
+                q.append((sr, sc))
+
+        neighbours = [
+            (-1, 0), (1, 0), (0, -1), (0, 1),
+            (-1, -1), (-1, 1), (1, -1), (1, 1),
+        ]
+
+        while q:
+            r, c = q.popleft()
+            oid = owner[r, c]
+            for dr, dc in neighbours:
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < h and 0 <= nc < w and passable[nr, nc] and owner[nr, nc] == 0:
+                    owner[nr, nc] = oid
+                    q.append((nr, nc))
+
+        # Build partition dict using numpy indexing per robot
+        partition: dict[str, set[tuple[int, int]]] = {}
+        for rid, _ in seeds:
+            idx = rid_to_idx[rid]
+            rows, cols = np.where(owner == idx)
+            partition[rid] = set(zip(rows.tolist(), cols.tolist()))
+
+        return partition
 
     # ── Status and visualization publishing ───────────────────────────────────
 
