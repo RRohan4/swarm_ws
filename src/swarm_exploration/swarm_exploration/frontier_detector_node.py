@@ -8,8 +8,10 @@ and publishes:
   /frontier_markers (visualization_msgs/MarkerArray)
 
 Parameters:
-  min_frontier_size : int    minimum cluster size to publish (default 5)
-  detect_rate       : float  Hz (default 2.0)
+  min_frontier_size  : int    minimum cluster size to publish (default 5)
+  detect_rate        : float  Hz (default 2.0)
+  merge_distance     : float  frontiers with centroids within this distance (m) are merged (default 0.3)
+  min_unknown_backing: int    minimum unique unknown neighbor cells for a cluster to be kept (default 10)
 """
 
 import numpy as np
@@ -37,12 +39,20 @@ class FrontierDetectorNode(Node):
 
         self.declare_parameter("min_frontier_size", 5)
         self.declare_parameter("detect_rate", 5.0)
+        self.declare_parameter("merge_distance", 0.3)
+        self.declare_parameter("min_unknown_backing", 10)
 
         self._min_size: int = (
             self.get_parameter("min_frontier_size").get_parameter_value().integer_value
         )
         rate: float = (
             self.get_parameter("detect_rate").get_parameter_value().double_value
+        )
+        self._merge_distance: float = (
+            self.get_parameter("merge_distance").get_parameter_value().double_value
+        )
+        self._min_unknown_backing: int = (
+            self.get_parameter("min_unknown_backing").get_parameter_value().integer_value
         )
 
         self._latest_map: OccupancyGrid | None = None
@@ -97,11 +107,23 @@ class FrontierDetectorNode(Node):
             if len(cells) < self._min_size:
                 continue
 
-            # Centroid in world frame
+            # Count unique unknown cells adjacent to this frontier cluster
+            unknown_neighbors = set()
+            for r, c in cells:
+                for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < h and 0 <= nc < w and unknown[nr, nc]:
+                        unknown_neighbors.add((nr, nc))
+            if len(unknown_neighbors) < self._min_unknown_backing:
+                continue
+
+            # Snap centroid to nearest frontier cell (medoid) so it's always reachable
             mean_row = cells[:, 0].mean()
             mean_col = cells[:, 1].mean()
-            cx = ox + (mean_col + 0.5) * res
-            cy = oy + (mean_row + 0.5) * res
+            dists_to_mean = (cells[:, 0] - mean_row) ** 2 + (cells[:, 1] - mean_col) ** 2
+            best_idx = np.argmin(dists_to_mean)
+            cx = ox + (cells[best_idx, 1] + 0.5) * res
+            cy = oy + (cells[best_idx, 0] + 0.5) * res
 
             f = Frontier()
             f.centroid = Point(x=cx, y=cy, z=0.0)
@@ -109,6 +131,8 @@ class FrontierDetectorNode(Node):
             f.info_score = 0.0  # filled by coordinator
             f.assigned_to = ""
             frontiers.append(f)
+
+        frontiers = self._merge_nearby(frontiers)
 
         stamp = self.get_clock().now().to_msg()
 
@@ -118,6 +142,27 @@ class FrontierDetectorNode(Node):
         self._frontier_pub.publish(fa)
 
         self._publish_markers(frontiers, stamp)
+
+    def _merge_nearby(self, frontiers: list[Frontier]) -> list[Frontier]:
+        """Greedily merge frontiers whose centroids are within merge_distance."""
+        if not frontiers:
+            return frontiers
+        # Sort largest first so they become anchors
+        frontiers.sort(key=lambda f: f.cluster_size, reverse=True)
+        merged: list[Frontier] = []
+        for f in frontiers:
+            absorbed = False
+            for m in merged:
+                dx = f.centroid.x - m.centroid.x
+                dy = f.centroid.y - m.centroid.y
+                if dx * dx + dy * dy <= self._merge_distance ** 2:
+                    # Absorb into existing — keep larger's centroid, sum sizes
+                    m.cluster_size += f.cluster_size
+                    absorbed = True
+                    break
+            if not absorbed:
+                merged.append(f)
+        return merged
 
     def _publish_markers(self, frontiers: list[Frontier], stamp) -> None:
         ma = MarkerArray()
