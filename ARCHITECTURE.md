@@ -109,11 +109,10 @@ Publishes at 2 Hz. Frontier markers are rendered as cyan cylinders in Foxglove, 
 | | Topic | Type |
 |---|---|---|
 | Sub | `/robot_N/map` | `nav_msgs/OccupancyGrid` — for map_cells_known count |
-| Sub | `/merged_map` | `nav_msgs/OccupancyGrid` — for BFS ground-distance computation |
+| Sub | `/merged_map` | `nav_msgs/OccupancyGrid` — ground truth for Voronoi BFS |
 | Sub | `/frontiers` | `swarm_msgs/FrontierArray` — global frontier list |
-| Sub | `/robot_poses` | `geometry_msgs/PoseArray` — all robot positions in world frame |
+| Sub | `/robot_poses` | `geometry_msgs/PoseArray` — all robot positions in world frame (Voronoi seeds) |
 | Sub | `/robot_ids` | `std_msgs/String` — peer discovery |
-| Sub | `/{peer}/goal` | `geometry_msgs/PoseStamped` — peer current goals (subscribed dynamically) |
 | Pub | `/robot_N/status` | `swarm_msgs/RobotStatus` — published at 2 Hz |
 | Pub | `/robot_N/goal` | `geometry_msgs/PoseStamped` — this robot's current navigation goal |
 | Pub | `/robot_N/goal_markers` | `visualization_msgs/MarkerArray` — arrow + sphere visualisation |
@@ -122,34 +121,35 @@ Publishes at 2 Hz. Frontier markers are rendered as cyan cylinders in Foxglove, 
 **State machine:**
 
 ```
-WAITING   → EXPLORING : frontier selected via local self-assignment
+WAITING   → EXPLORING : frontier selected via geodesic Voronoi self-assignment
 EXPLORING → WAITING   : Nav2 goal succeeded  OR  assigned frontier disappeared
 EXPLORING → WAITING   : Nav2 goal failed (obstacle / unreachable)
 WAITING   → DONE      : no frontiers remain after exploration
 ```
 
-**Scoring function (decentralised self-assignment):**
+**Frontier assignment — geodesic Voronoi partitioning:**
 
-Each robot independently scores all available frontiers and picks the best one:
+Each time the robot needs a new target it runs `_multi_source_bfs_partition()` — a simultaneous multi-source BFS seeded from every known robot position on the merged map. Cells are passable if free (`0`) or unknown (`-1`), so frontier cells on the free/unknown boundary are always reachable. The first wavefront to arrive at a cell claims it:
 
 ```
-score = (1 / effective_gd) * min_peer_goal_separation
-
-effective_gd = gd / heading_factor
-  where heading_factor ∈ [0.02, 1.0] based on how well the BFS path
-  direction aligns with the robot's current heading (penalises U-turns)
-gd = ground distance from BFS wavefront on /merged_map
-     (falls back to Euclidean × 1.4 if BFS unavailable)
+owner[cell] = index of the robot whose BFS wavefront reached it first
 ```
 
-Peer goal separation: if a peer is already navigating to a nearby point, that frontier's score is reduced, preventing robots from converging on the same location.
+This produces a geodesic Voronoi diagram that respects obstacles — a robot cannot own cells it cannot physically reach.
+
+Frontier selection then proceeds:
+
+1. **Partition candidates** — frontiers whose centroid cell is owned by this robot.
+2. **Global fallback** — if the partition contains no frontiers (robot in a fully explored pocket), all candidates are considered.
+
+Within the pool, the best frontier is the one with the smallest geodesic distance from the robot's **anchor** — the last successfully reached frontier. Using the anchor rather than the current position biases the robot to continue sweeping forward rather than doubling back.
 
 Additional robustness mechanisms:
 - **Blacklist with 120 s TTL** — failed navigation targets are ignored to prevent thrashing
-- **Frontier vanishing detection** — if the assigned frontier disappears from `/frontiers` during navigation, the goal is cancelled and a new one selected
-- **Goal timeout** — 60 s maximum per navigation goal
+- **Frontier vanishing detection** — if the target frontier disappears from `/frontiers` during navigation, the goal is cancelled early and a new target selected
+- **Goal timeout** — 60 s maximum per navigation goal; timed-out goals are cancelled and retried
 
-**Visualisation colours:** orange = robot_0, blue = robot_1, magenta = robot_2.
+**Visualisation colours:** orange = robot_0, blue = robot_1, magenta = robot_2, green = robot_3.
 
 ---
 
@@ -222,10 +222,11 @@ so that `/model/robot_N/cmd_vel` maps to `/robot_N/cmd_vel`.
 | Decision | Choice | Rationale |
 |---|---|---|
 | Communication | Global ROS 2 topics, no radio simulation | Eliminates comm complexity; focus on exploration strategy |
-| Exploration strategy | Decentralised local self-assignment (BFS ground distance + heading penalty + peer separation) | Scalable, no coordinator bottleneck, collision-free assignment |
-| Coordination | No central coordinator — each robot picks its own frontier | More resilient; coordinator was a single point of failure with no added correctness benefit at this scale |
+| Exploration strategy | Geodesic Voronoi partitioning — each robot owns the map region it reaches first | Prevents duplicate work without a central coordinator; naturally load-balances by proximity |
+| Coordination | Fully decentralised — each robot independently computes its partition and picks the nearest frontier within it | More resilient than a coordinator; scales to arbitrary swarm sizes |
+| Frontier ranking within partition | Geodesic distance from last-reached anchor | Biases the robot to sweep forward rather than double back |
+| Global fallback | Robot selects from all candidates when its Voronoi partition contains no frontiers | Prevents stalls when a robot is in a fully explored pocket |
 | Map sharing | Direct `/robot_N/map` subscriptions, numpy overlay | No compression overhead; bandwidth is unconstrained in sim |
-| Frontier scoring | `1 / effective_gd` with heading factor and peer separation | Balances travel cost, direction continuity, and inter-robot spread |
 | Frontier detection | `scipy.ndimage` label on merged map | Fast, dependency-free, well-tested |
 | TF alignment | Identity static transform at spawn | Robots start at known offsets; no ICP needed |
 | Container networking | `network_mode: host` + `/dev/shm` volume | Shared host network for DDS multicast; shared memory for low-latency IPC |
@@ -390,3 +391,4 @@ ros2 topic echo /robot_0/status --field map_cells_known
 | 4 | `frontier_detector_node` | ✅ Complete |
 | 5 | `robot_fsm_node` with manual target publishing | ✅ Complete |
 | 6 | Autonomous exploration with decentralised self-assignment | ✅ Complete |
+| 7 | Geodesic Voronoi partitioning for collision-free region ownership | ✅ Complete |
