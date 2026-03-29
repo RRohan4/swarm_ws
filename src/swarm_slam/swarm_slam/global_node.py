@@ -120,9 +120,13 @@ class GlobalNode(Node):
         self._ids_pub.publish(String(data=",".join(self._robot_ids)))
 
         # Publish robot poses in world frame, in robot_ids order.
+        # Always emit exactly len(robot_ids) entries so that pose index i
+        # always corresponds to robot_ids[i].  Robots without odom data yet
+        # get a zero Pose() placeholder; FSM nodes must skip those.
         world_poses: list[Pose] = []
         for rid in self._robot_ids:
             if rid not in self._poses:
+                world_poses.append(Pose())  # placeholder — keeps index alignment
                 continue
             raw = self._poses[rid]
             # Transform odom-frame position into world frame via TF.
@@ -147,7 +151,7 @@ class GlobalNode(Node):
                     f"TF world→{rid}/odom unavailable: {e}",
                     throttle_duration_sec=10.0,
                 )
-                world_poses.append(raw)  # fall back to raw odom if TF not ready
+                world_poses.append(Pose())  # placeholder if TF not ready
         if world_poses:
             pa = PoseArray()
             pa.header = Header(stamp=self.get_clock().now().to_msg(), frame_id="world")
@@ -248,20 +252,18 @@ class GlobalNode(Node):
             di = mi[valid]
             dj = mj[valid]
 
-            # Merge priority: free > occupied > unknown.
-            # Occupied only fills unknown cells — it cannot override confirmed
-            # free space.  Free space is authoritative and overwrites occupied,
-            # so ghost obstacles left by moving robots are cleared as soon as
-            # any robot's raytrace sweeps through the vacated area.
-            # Real walls are never marked free (no ray penetrates them), so
-            # they accumulate occupied votes from multiple robots and remain.
-            occupied = src == 100
-            dst_unknown = merged[di[occupied], dj[occupied]] == -1
-            occ_idx = np.where(occupied)[0]
-            merged[di[occ_idx[dst_unknown]], dj[occ_idx[dst_unknown]]] = 100
-
+            # Merge priority: occupied > free > unknown.
+            # In a static maze any occupied reading is authoritative — a robot
+            # that detects a wall wins over one whose raytrace skims past it due
+            # to minor SLAM registration error.  Letting free override occupied
+            # punches holes in walls and causes frontiers to appear inside them.
             free = src == 0
-            merged[di[free], dj[free]] = 0
+            dst_unknown_free = merged[di[free], dj[free]] == -1
+            free_idx = np.where(free)[0]
+            merged[di[free_idx[dst_unknown_free]], dj[free_idx[dst_unknown_free]]] = 0
+
+            occupied = src == 100
+            merged[di[occupied], dj[occupied]] = 100
 
         out = OccupancyGrid()
         out.header = Header(

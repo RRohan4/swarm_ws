@@ -40,33 +40,51 @@ The dev container includes ROS 2 Jazzy, `ruff`, `mypy`, `pre-commit`, and recomm
 From the workspace root — either on the host or from a terminal inside the dev container:
 
 ```bash
-# Build the sim image (only needed after Dockerfile or dependency changes)
-docker compose build
-
-# Start the full 3-robot stack
-docker compose up
+make build    # Build the sim image (only needed after Dockerfile or dependency changes)
+make up       # Start the full 4-robot stack
+make down     # Stop and remove containers
+make rebuild  # Build then start in one step
+make logs     # Follow logs from all running services
 ```
 
-This starts six services:
+This starts seven services:
 
 | Service | What it runs |
 |---------|-------------|
-| `sim` | Gazebo Harmonic headless, clock bridge, 3 × `robot_stack` |
+| `sim` | Gazebo Harmonic headless + clock bridge |
 | `robot_0` | TurtleBot3 Waffle at (0.6, 0.6) — SLAM + Nav2 + FSM |
 | `robot_1` | TurtleBot3 Waffle at (1.8, 0.6) — SLAM + Nav2 + FSM |
 | `robot_2` | TurtleBot3 Waffle at (0.6, 1.8) — SLAM + Nav2 + FSM |
+| `robot_3` | TurtleBot3 Waffle at (1.8, 1.8) — SLAM + Nav2 + FSM |
 | `global` | Map merge node + frontier detector |
 | `foxglove` | Foxglove bridge on `ws://localhost:8765` |
 
-Stop with `Ctrl-C` or `docker compose down`.
+Stop with `Ctrl-C` or `make down`.
 
-### Single-robot mode
+### Regression tests
 
-For regression testing with one robot:
+**Fast (headless)** — validates launch file syntax and node imports in seconds, no display needed:
 
 ```bash
-docker compose --profile sim_single up
+make test        # docker build --target test .
 ```
+
+**Live single-robot** — starts Gazebo with one robot to verify the full exploration stack end-to-end:
+
+```bash
+make single      # docker compose --profile single up
+```
+
+### Bag recording
+
+Run headless at maximum simulation speed and record a bag (auto-stops when all robots reach DONE):
+
+```bash
+make record           # headless only
+make record FOXGLOVE=1  # also start the Foxglove bridge
+```
+
+Bags are written to `./bags/`.
 
 ---
 

@@ -6,10 +6,6 @@ x-base: &base
     GZ_IP: "127.0.0.1"
     ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
     RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
-    # CycloneDDS default caps auto-assigned participant indices at 0–99 (100
-    # total). With 4 robots × ~8 Nav2 nodes each plus SLAM, bridges, global
-    # nodes and FSM nodes all sharing domain 0 on the same host we blow through
-    # that limit, causing "Failed to find a free participant index" crashes.
     # Raise MaxAutoParticipantIndex to 200 to give ample headroom.
     CYCLONEDDS_URI: "<CycloneDDS><Domain><Discovery><MaxAutoParticipantIndex>200</MaxAutoParticipantIndex></Discovery></Domain></CycloneDDS>"
   volumes:
@@ -23,6 +19,7 @@ services:
       <<: *base-env
       DISPLAY: ${DISPLAY:-:0}
       QT_X11_NO_MITSHM: "1"
+      GZ_REAL_TIME_FACTOR: "1.0"
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/shm:/dev/shm
@@ -92,6 +89,20 @@ services:
                ros2 launch swarm_bringup global.launch.py robot_ids:=robot_0,robot_1,robot_2,robot_3"
     depends_on: [robot_0, robot_1, robot_2, robot_3]
 
+  # ── Single-robot regression (activate with: make single) ─────────────────────
+  sim_single:
+    <<: *base
+    environment:
+      <<: *base-env
+      SWARM_ROBOT_ID: robot_0
+      SWARM_X: "0.6"
+      SWARM_Y: "0.6"
+      SWARM_YAW: "1.5708"
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_bringup swarm.launch.py num_robots:=1"
+    profiles: [single]
+
   # ── Foxglove bridge ───────────────────────────────────────────────────────────
   foxglove:
     <<: *base
@@ -100,18 +111,3 @@ services:
                ros2 run foxglove_bridge foxglove_bridge
                --ros-args -p port:=8765 -p use_sim_time:=true"
     depends_on: [sim]
-
-  # ── Single-robot regression (Phase 0) ────────────────────────────────────────
-  sim_single:
-    <<: *base
-    environment:
-      <<: *base-env
-      DISPLAY: ${DISPLAY:-:0}
-      QT_X11_NO_MITSHM: "1"
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - /dev/shm:/dev/shm
-    command: >
-      bash -c ". /ws/install/setup.sh &&
-               ros2 launch swarm_exploration single_robot.launch.py"
-    profiles: [single]

@@ -88,17 +88,31 @@ class FrontierDetectorNode(Node):
         unknown = grid == -1
         occupied = grid > 50  # occupied cells (typically 100)
 
-        # Exclude free cells near obstacles — prevents frontiers in tight corners
-        # that the robot cannot physically reach without clipping walls.
+        # Exclude free cells too close to obstacles.  The clearance must match
+        # Nav2's inflation_radius (0.55 m) so that frontier centroids always
+        # land outside the inflated costmap — otherwise the planner sees the
+        # goal as inside a wall and fails to produce a path.
+        clearance_cells = max(1, round(0.55 / res))
         obstacle_buffer = ndimage.binary_dilation(
             occupied,
-            structure=np.ones((3, 3)),  # ~1 cell clearance at 0.05m res
+            structure=np.ones((3, 3)),
+            iterations=clearance_cells,
         )
         safe_free = free & ~obstacle_buffer
 
         # Dilate unknown mask by 1 cell; intersection with safe free gives frontiers
         unknown_dilated = ndimage.binary_dilation(unknown, structure=np.ones((3, 3)))
         frontier_mask = safe_free & unknown_dilated
+
+        # Strip cells within EDGE_MARGIN pixels of the map boundary.
+        # Without this, frontier centroids land at the costmap edge, causing
+        # the Nav2 planner to try inflating obstacles off the grid
+        # ("worldToMap failed") and fail to make progress.
+        EDGE_MARGIN = 4
+        frontier_mask[:EDGE_MARGIN, :] = False
+        frontier_mask[-EDGE_MARGIN:, :] = False
+        frontier_mask[:, :EDGE_MARGIN] = False
+        frontier_mask[:, -EDGE_MARGIN:] = False
 
         # Label connected components
         labeled, num_features = ndimage.label(frontier_mask)

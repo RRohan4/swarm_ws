@@ -110,6 +110,7 @@ class RobotFSMNode(Node):
         # Peer awareness
         self._my_pos: Point | None = None  # own position
         self._peer_poses: dict[str, Point] = {}  # peer robot positions
+        self._peer_goals: dict[str, Point | None] = {}  # peer current nav goals
 
         # Local assignment state
         self._blacklist: list[tuple[Point, float]] = []
@@ -192,6 +193,12 @@ class RobotFSMNode(Node):
         for i, pose in enumerate(msg.poses):
             if i >= len(self._robot_ids):
                 break
+            # Zero pose is a placeholder from global_node for a robot whose
+            # odom hasn't arrived yet — skip it so _peer_poses only holds
+            # valid positions and partition_valid stays False until all peers
+            # are truly located.
+            if pose.position.x == 0.0 and pose.position.y == 0.0:
+                continue
             rid = self._robot_ids[i]
             if rid == self._robot_id:
                 self._my_pos = pose.position
@@ -205,6 +212,19 @@ class RobotFSMNode(Node):
             if peer_id == self._robot_id or peer_id in self._subscribed_peers:
                 continue
             self._subscribed_peers.add(peer_id)
+            self._peer_goals[peer_id] = None
+            self.create_subscription(
+                PoseStamped,
+                f"/{peer_id}/goal",
+                lambda msg, pid=peer_id: self._peer_goal_cb(msg, pid),
+                10,
+            )
+            self.create_subscription(
+                RobotStatus,
+                f"/{peer_id}/status",
+                lambda msg, pid=peer_id: self._peer_status_cb(msg, pid),
+                10,
+            )
             self.get_logger().info(f"[{self._robot_id}] discovered peer {peer_id}")
 
     def _frontiers_cb(self, msg: FrontierArray) -> None:
@@ -248,6 +268,14 @@ class RobotFSMNode(Node):
         # Trigger self-assignment if we're idle
         if self._state == WAITING and self._frontiers:
             self._assign_needed = True
+
+    def _peer_goal_cb(self, msg: PoseStamped, peer_id: str) -> None:
+        self._peer_goals[peer_id] = msg.pose.position
+
+    def _peer_status_cb(self, msg: RobotStatus, peer_id: str) -> None:
+        # Clear stored goal once peer is no longer navigating
+        if msg.state != EXPLORING:
+            self._peer_goals[peer_id] = None
 
     # ── Nav2 interaction ───────────────────────────────────────────────────────
 
@@ -400,6 +428,13 @@ class RobotFSMNode(Node):
         if not candidates:
             return
 
+        # Only trust the Voronoi partition when we have positions for every robot.
+        # With incomplete peer data the partition is wrong and robots overlap.
+        expected_peers = {rid for rid in self._robot_ids if rid != self._robot_id}
+        partition_valid = self._merged_map is not None and expected_peers.issubset(
+            self._peer_poses.keys()
+        )
+
         # Split into frontiers within our Voronoi partition and all candidates
         def _owner_of(f: Frontier) -> int:
             cell = self._world_to_grid(f.centroid)
@@ -407,7 +442,10 @@ class RobotFSMNode(Node):
                 return 0
             return int(owner[cell[0], cell[1]])
 
-        my_frontiers = [f for f in candidates if _owner_of(f) == my_idx]
+        if partition_valid:
+            my_frontiers = [f for f in candidates if _owner_of(f) == my_idx]
+        else:
+            my_frontiers = []
 
         pool = my_frontiers if my_frontiers else candidates
 
@@ -419,7 +457,11 @@ class RobotFSMNode(Node):
             d = float(rank_dists[cell[0], cell[1]])
             return d if d != np.inf else _dist(self._my_pos, f.centroid) * 1.4
 
-        best_f = min(pool, key=_rank_dist)
+        # Prefer non-peer-targeted frontiers; break ties by ground distance
+        def _rank(f: Frontier) -> tuple[int, float]:
+            return (1 if self._is_peer_targeted(f.centroid) else 0, _rank_dist(f))
+
+        best_f = min(pool, key=_rank)
 
         # Build and send goal
         stamp = self.get_clock().now().to_msg()
@@ -456,6 +498,12 @@ class RobotFSMNode(Node):
 
     def _is_blacklisted(self, centroid: Point) -> bool:
         return any(_dist(pt, centroid) < BLACKLIST_DIST for pt, _ in self._blacklist)
+
+    def _is_peer_targeted(self, centroid: Point) -> bool:
+        return any(
+            goal is not None and _dist(goal, centroid) < BLACKLIST_DIST
+            for goal in self._peer_goals.values()
+        )
 
     # ── Ground distance helpers ───────────────────────────────────────────────
 
@@ -575,6 +623,7 @@ class RobotFSMNode(Node):
         q: deque[tuple[int, int]] = deque()
 
         for rid, (sr, sc) in seeds:
+            passable[sr, sc] = True  # robot may sit in a slightly-occupied cell
             if owner[sr, sc] == 0:
                 owner[sr, sc] = rid_to_idx[rid]
                 q.append((sr, sc))

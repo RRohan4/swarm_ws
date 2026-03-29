@@ -54,3 +54,18 @@ RUN . /opt/ros/jazzy/setup.sh && . install/setup.sh \
     && colcon build --symlink-install --packages-select swarm_bringup
 
 SHELL ["/bin/bash", "-c"]
+
+# ── Regression-test stage ─────────────────────────────────────────────────────
+# Run with: docker build --target test .
+# Validates that every launch file parses cleanly and all ROS 2 entry points
+# are importable.  Runs headlessly (no Gazebo process, no display needed) so
+# it completes in seconds and is safe to use in CI.
+FROM base AS test
+RUN . /opt/ros/jazzy/setup.sh && . install/setup.sh \
+    && ros2 launch swarm_bringup swarm.launch.py --show-args \
+    && ros2 launch swarm_bringup robot_stack.launch.py --show-args \
+    && ros2 launch swarm_bringup global.launch.py --show-args \
+    && python3 -c "from swarm_slam.global_node import GlobalNode" \
+    && python3 -c "from swarm_exploration.frontier_detector_node import FrontierDetectorNode" \
+    && python3 -c "from swarm_exploration.robot_fsm_node import RobotFSMNode" \
+    && echo "--- regression test passed ---"

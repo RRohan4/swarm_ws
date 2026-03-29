@@ -3,9 +3,9 @@
     "3D!4hdne1a": {
       "cameraState": {
         "perspective": false,
-        "distance": 20,
-        "phi": 12.711070865188494,
-        "thetaOffset": 0.21318032570600054,
+        "distance": 35.16173831821235,
+        "phi": 0.00005729832627056611,
+        "thetaOffset": -0.20298914616688152,
         "targetOffset": [0, 0, 0],
         "target": [0, 0, 0],
         "targetOrientation": [0, 0, 0, 1],
@@ -18,7 +18,8 @@
       "fixedFrame": "world",
       "scene": {
         "transforms": {
-          "showLabel": true
+          "showLabel": true,
+          "labelSize": 0.2286
         }
       },
       "transforms": {
@@ -26,42 +27,6 @@
           "visible": false
         },
         "frame:world": {
-          "visible": false
-        },
-        "frame:robot_1/base_footprint": {
-          "visible": false
-        },
-        "frame:robot_1/base_link": {
-          "visible": false
-        },
-        "frame:robot_1/base_scan": {
-          "visible": false
-        },
-        "frame:robot_1/camera_link": {
-          "visible": false
-        },
-        "frame:robot_1/camera_depth_frame": {
-          "visible": false
-        },
-        "frame:robot_1/camera_depth_optical_frame": {
-          "visible": false
-        },
-        "frame:robot_1/camera_rgb_frame": {
-          "visible": false
-        },
-        "frame:robot_1/camera_rgb_optical_frame": {
-          "visible": false
-        },
-        "frame:robot_1/caster_back_left_link": {
-          "visible": false
-        },
-        "frame:robot_1/caster_back_right_link": {
-          "visible": false
-        },
-        "frame:robot_1/imu_link": {
-          "visible": true
-        },
-        "frame:robot_1/map": {
           "visible": false
         },
         "frame:robot_0/base_footprint": {
@@ -100,23 +65,56 @@
         "frame:robot_0/odom": {
           "visible": false
         },
-        "frame:robot_1/odom": {
-          "visible": false
-        },
         "frame:robot_0/wheel_left_link": {
           "visible": true
         },
         "frame:robot_0/wheel_right_link": {
           "visible": true
         },
+        "frame:robot_1/map": {
+          "visible": false
+        },
+        "frame:robot_1/base_footprint": {
+          "visible": false
+        },
+        "frame:robot_1/base_link": {
+          "visible": false
+        },
+        "frame:robot_1/base_scan": {
+          "visible": false
+        },
+        "frame:robot_1/camera_link": {
+          "visible": false
+        },
+        "frame:robot_1/camera_depth_frame": {
+          "visible": false
+        },
+        "frame:robot_1/camera_depth_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_1/camera_rgb_frame": {
+          "visible": false
+        },
+        "frame:robot_1/camera_rgb_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_1/caster_back_left_link": {
+          "visible": false
+        },
+        "frame:robot_1/caster_back_right_link": {
+          "visible": false
+        },
+        "frame:robot_1/imu_link": {
+          "visible": true
+        },
+        "frame:robot_1/odom": {
+          "visible": false
+        },
         "frame:robot_1/wheel_left_link": {
           "visible": true
         },
         "frame:robot_1/wheel_right_link": {
           "visible": true
-        },
-        "frame:": {
-          "visible": false
         },
         "frame:robot_2/map": {
           "visible": false
@@ -156,30 +154,144 @@
         },
         "frame:robot_2/imu_link": {
           "visible": true
+        },
+        "frame:robot_3/map": {
+          "visible": false
+        },
+        "frame:robot_3/odom": {
+          "visible": false
+        },
+        "frame:robot_3/base_footprint": {
+          "visible": false
+        },
+        "frame:robot_3/base_link": {
+          "visible": false
+        },
+        "frame:robot_3/base_scan": {
+          "visible": false
+        },
+        "frame:robot_3/camera_link": {
+          "visible": false
+        },
+        "frame:robot_3/camera_depth_frame": {
+          "visible": false
+        },
+        "frame:robot_3/camera_depth_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_3/camera_rgb_frame": {
+          "visible": false
+        },
+        "frame:robot_3/camera_rgb_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_3/caster_back_left_link": {
+          "visible": false
+        },
+        "frame:robot_3/caster_back_right_link": {
+          "visible": false
+        },
+        "frame:robot_4/map": {
+          "visible": false
+        },
+        "frame:robot_4/odom": {
+          "visible": false
+        },
+        "frame:robot_4/base_footprint": {
+          "visible": false
+        },
+        "frame:robot_4/base_link": {
+          "visible": false
+        },
+        "frame:robot_4/base_scan": {
+          "visible": false
+        },
+        "frame:robot_4/camera_link": {
+          "visible": false
+        },
+        "frame:robot_4/camera_depth_frame": {
+          "visible": false
+        },
+        "frame:robot_4/camera_depth_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_4/camera_rgb_frame": {
+          "visible": false
+        },
+        "frame:robot_4/camera_rgb_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_4/caster_back_left_link": {
+          "visible": false
+        },
+        "frame:robot_4/caster_back_right_link": {
+          "visible": false
+        },
+        "frame:robot_4/imu_link": {
+          "visible": true
+        },
+        "frame:robot_4/wheel_left_link": {
+          "visible": true
+        },
+        "frame:robot_4/wheel_right_link": {
+          "visible": true
+        },
+        "frame:robot_5/map": {
+          "visible": false
+        },
+        "frame:robot_5/odom": {
+          "visible": false
+        },
+        "frame:robot_5/base_footprint": {
+          "visible": false
+        },
+        "frame:robot_5/base_link": {
+          "visible": false
+        },
+        "frame:robot_5/base_scan": {
+          "visible": false
+        },
+        "frame:robot_5/camera_link": {
+          "visible": false
+        },
+        "frame:robot_5/camera_depth_frame": {
+          "visible": false
+        },
+        "frame:robot_5/camera_depth_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_5/camera_rgb_frame": {
+          "visible": false
+        },
+        "frame:robot_5/camera_rgb_optical_frame": {
+          "visible": false
+        },
+        "frame:robot_5/caster_back_left_link": {
+          "visible": false
+        },
+        "frame:robot_5/caster_back_right_link": {
+          "visible": false
+        },
+        "frame:robot_5/imu_link": {
+          "visible": true
+        },
+        "frame:robot_5/wheel_left_link": {
+          "visible": true
+        },
+        "frame:robot_5/wheel_right_link": {
+          "visible": true
+        },
+        "frame:": {
+          "visible": false
         }
       },
       "topics": {
-        "/robot_1/map": {
-          "visible": false
+        "/merged_map": {
+          "visible": true
         },
-        "/robot_0/local_costmap/costmap": {
+        "/frontier_markers": {
           "visible": true,
-          "frameLocked": false,
-          "drawBehind": false,
-          "colorMode": "costmap",
-          "alpha": 0.252
-        },
-        "/robot_0/marker": {
-          "visible": false
-        },
-        "/robot_0/slam_toolbox/graph_visualization": {
-          "visible": false
-        },
-        "/robot_1/marker": {
-          "visible": false
-        },
-        "/robot_1/slam_toolbox/graph_visualization": {
-          "visible": false
+          "showOutlines": true
         },
         "/robot_0/scan": {
           "visible": true,
@@ -189,63 +301,12 @@
           "pointShape": "cube",
           "decayTime": 0
         },
-        "/robot_0/slam_toolbox/scan_visualization": {
-          "visible": false
-        },
-        "/robot_1/scan": {
+        "/robot_0/local_costmap/costmap": {
           "visible": true,
-          "colorField": "range",
-          "colorMode": "colormap",
-          "colorMap": "turbo",
-          "pointShape": "cube"
-        },
-        "/robot_1/slam_toolbox/scan_visualization": {
-          "visible": false,
-          "pointShape": "cube"
-        },
-        "/merged_map": {
-          "visible": true
-        },
-        "/robot_0/global_costmap/costmap": {
-          "visible": false
-        },
-        "/robot_0/global_costmap/map": {
-          "visible": false
-        },
-        "/robot_0/global_costmap/obstacle_layer": {
-          "visible": false
-        },
-        "/robot_0/global_costmap/static_layer": {
-          "visible": false
-        },
-        "/robot_0/local_costmap/voxel_layer": {
-          "visible": false
-        },
-        "/robot_0/map": {
-          "visible": false
-        },
-        "/robot_1/global_costmap/costmap": {
-          "visible": false
-        },
-        "/robot_1/global_costmap/map": {
-          "visible": false
-        },
-        "/robot_1/global_costmap/obstacle_layer": {
-          "visible": false
-        },
-        "/robot_1/global_costmap/static_layer": {
-          "visible": false
-        },
-        "/robot_1/local_costmap/costmap": {
-          "visible": true,
+          "frameLocked": false,
+          "drawBehind": false,
           "colorMode": "costmap",
           "alpha": 0.252
-        },
-        "/robot_1/local_costmap/voxel_layer": {
-          "visible": false
-        },
-        "/robot_0/cost_cloud": {
-          "visible": false
         },
         "/robot_0/local_costmap/clearing_endpoints": {
           "visible": true,
@@ -253,122 +314,12 @@
           "colorMode": "colormap",
           "colorMap": "turbo"
         },
-        "/robot_1/cost_cloud": {
-          "visible": false
-        },
-        "/robot_1/local_costmap/clearing_endpoints": {
-          "visible": true,
-          "colorField": "z",
-          "colorMode": "colormap",
-          "colorMap": "turbo"
-        },
-        "/robot_0/global_costmap/published_footprint": {
-          "visible": false,
-          "color": "#be5656ff"
-        },
-        "/robot_0/local_costmap/published_footprint": {
-          "visible": false,
-          "color": "#be5656ff"
-        },
-        "/robot_1/global_costmap/published_footprint": {
-          "visible": false,
-          "color": "#be5656ff"
-        },
-        "/robot_1/local_costmap/published_footprint": {
-          "visible": false,
-          "color": "#be5656ff"
-        },
-        "/initialpose": {
-          "visible": false
-        },
-        "/move_base_simple/goal": {
-          "visible": false
-        },
-        "/robot_0/goal_pose": {
-          "visible": false,
-          "type": "arrow"
-        },
         "/robot_0/pose": {
           "visible": true,
           "type": "arrow",
           "showCovariance": false,
           "color": "#c1b041ff",
           "arrowScale": [0.479, 0.098, 1.364]
-        },
-        "/robot_1/goal_pose": {
-          "visible": false,
-          "type": "arrow"
-        },
-        "/robot_1/pose": {
-          "visible": true,
-          "type": "arrow",
-          "color": "#c1b041ff",
-          "arrowScale": [0.479, 0.098, 1.364],
-          "showCovariance": false
-        },
-        "/robot_0/local_plan": {
-          "visible": false
-        },
-        "/robot_0/plan": {
-          "visible": false
-        },
-        "/robot_0/plan_smoothed": {
-          "visible": false
-        },
-        "/robot_0/received_global_plan": {
-          "visible": false
-        },
-        "/robot_0/transformed_global_plan": {
-          "visible": true
-        },
-        "/robot_1/local_plan": {
-          "visible": false
-        },
-        "/robot_1/plan": {
-          "visible": false
-        },
-        "/robot_1/plan_smoothed": {
-          "visible": false
-        },
-        "/robot_1/received_global_plan": {
-          "visible": false
-        },
-        "/robot_1/transformed_global_plan": {
-          "visible": true
-        },
-        "/robot_poses": {
-          "visible": false,
-          "type": "arrow"
-        },
-        "/robot_0/local_costmap/voxel_grid": {
-          "visible": false
-        },
-        "/robot_1/local_costmap/voxel_grid": {
-          "visible": false
-        },
-        "/robot_0/global_costmap/scan": {
-          "visible": false
-        },
-        "/robot_0/local_costmap/scan": {
-          "visible": false
-        },
-        "/robot_1/local_costmap/scan": {
-          "visible": false
-        },
-        "/robot_1/global_costmap/scan": {
-          "visible": false
-        },
-        "/robot_1/exploration_target": {
-          "visible": false,
-          "type": "axis"
-        },
-        "/robot_0/exploration_target": {
-          "visible": false,
-          "type": "axis"
-        },
-        "/frontier_markers": {
-          "visible": true,
-          "showOutlines": true
         },
         "/robot_0/goal_markers": {
           "visible": true,
@@ -379,15 +330,80 @@
             }
           }
         },
+        "/robot_0/transformed_global_plan": {
+          "visible": true
+        },
         "/robot_0/goal": {
           "visible": false,
           "type": "axis"
         },
+        "/robot_0/map": {
+          "visible": false
+        },
+        "/robot_0/global_costmap/costmap": {
+          "visible": false
+        },
+        "/robot_0/slam_toolbox/graph_visualization": {
+          "visible": false
+        },
+        "/robot_0/local_costmap/voxel_layer": {
+          "visible": false
+        },
+        "/robot_0/global_costmap/published_footprint": {
+          "visible": false,
+          "color": "#be5656ff"
+        },
+        "/robot_0/local_costmap/published_footprint": {
+          "visible": false,
+          "color": "#be5656ff"
+        },
+        "/robot_1/scan": {
+          "visible": true,
+          "colorField": "range",
+          "colorMode": "colormap",
+          "colorMap": "turbo",
+          "pointShape": "cube"
+        },
+        "/robot_1/local_costmap/costmap": {
+          "visible": true,
+          "colorMode": "costmap",
+          "alpha": 0.252
+        },
+        "/robot_1/local_costmap/clearing_endpoints": {
+          "visible": true,
+          "colorField": "z",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/robot_1/pose": {
+          "visible": true,
+          "type": "arrow",
+          "color": "#c1b041ff",
+          "arrowScale": [0.479, 0.098, 1.364],
+          "showCovariance": false
+        },
         "/robot_1/goal_markers": {
           "visible": true
         },
-        "/robot_2/goal_markers": {
+        "/robot_1/transformed_global_plan": {
           "visible": true
+        },
+        "/robot_1/map": {
+          "visible": false
+        },
+        "/robot_1/global_costmap/costmap": {
+          "visible": false
+        },
+        "/robot_1/slam_toolbox/graph_visualization": {
+          "visible": false
+        },
+        "/robot_1/global_costmap/published_footprint": {
+          "visible": false,
+          "color": "#be5656ff"
+        },
+        "/robot_1/local_costmap/published_footprint": {
+          "visible": false,
+          "color": "#be5656ff"
         },
         "/robot_2/scan": {
           "visible": true,
@@ -395,9 +411,6 @@
           "colorMode": "colormap",
           "colorMap": "turbo",
           "pointShape": "cube"
-        },
-        "/robot_2/local_costmap/static_layer": {
-          "visible": false
         },
         "/robot_2/local_costmap/costmap": {
           "visible": true,
@@ -417,24 +430,124 @@
           "arrowScale": [0.479, 0.098, 1.364],
           "color": "#c1b041ff"
         },
+        "/robot_2/goal_markers": {
+          "visible": true
+        },
         "/robot_2/transformed_global_plan": {
           "visible": true
         },
-        "/robot_1/camera/image_raw": {
-          "cameraInfoTopic": "/robot_1/camera/camera_info"
+        "/robot_2/local_costmap/static_layer": {
+          "visible": false
+        },
+        "/robot_2/local_costmap/obstacle_layer": {
+          "visible": false
+        },
+        "/robot_3/scan": {
+          "visible": true,
+          "colorField": "range",
+          "colorMode": "colormap",
+          "colorMap": "rainbow",
+          "pointShape": "cube"
+        },
+        "/robot_3/local_costmap/costmap": {
+          "visible": true,
+          "colorMode": "costmap",
+          "alpha": 0.252
+        },
+        "/robot_3/local_costmap/clearing_endpoints": {
+          "visible": true,
+          "colorField": "z",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/robot_3/pose": {
+          "visible": true,
+          "type": "arrow",
+          "arrowScale": [0.479, 0.098, 1.364],
+          "color": "#c1b041ff"
+        },
+        "/robot_3/goal_markers": {
+          "visible": true
+        },
+        "/robot_3/transformed_global_plan": {
+          "visible": true
+        },
+        "/robot_4/scan": {
+          "visible": true,
+          "colorField": "range",
+          "colorMode": "colormap",
+          "colorMap": "turbo",
+          "pointShape": "cube"
+        },
+        "/robot_4/local_costmap/costmap": {
+          "visible": true,
+          "colorMode": "costmap",
+          "alpha": 0.252
+        },
+        "/robot_4/local_costmap/clearing_endpoints": {
+          "visible": true,
+          "colorField": "z",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/robot_4/pose": {
+          "visible": true,
+          "type": "arrow",
+          "arrowScale": [0.479, 0.098, 1.364],
+          "color": "#c1b041ff"
+        },
+        "/robot_4/goal_markers": {
+          "visible": true
+        },
+        "/robot_4/transformed_global_plan": {
+          "visible": true
+        },
+        "/robot_5/scan": {
+          "visible": true,
+          "colorField": "range",
+          "colorMode": "colormap",
+          "colorMap": "turbo",
+          "pointShape": "cube"
+        },
+        "/robot_5/local_costmap/costmap": {
+          "visible": true,
+          "colorMode": "costmap",
+          "alpha": 0.252
+        },
+        "/robot_5/local_costmap/clearing_endpoints": {
+          "visible": true,
+          "colorField": "z",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/robot_5/pose": {
+          "visible": true,
+          "type": "arrow",
+          "arrowScale": [0.479, 0.098, 1.364],
+          "color": "#c1b041ff"
+        },
+        "/robot_5/goal_markers": {
+          "visible": true
+        },
+        "/robot_5/transformed_global_plan": {
+          "visible": true
+        },
+        "/robot_poses": {
+          "visible": false,
+          "type": "arrow"
         },
         "/robot_0/camera/image_raw": {
           "cameraInfoTopic": "/robot_0/camera/camera_info",
           "visible": false
         },
-        "/robot_0/camera/camera_info": {
-          "visible": false
+        "/robot_1/camera/image_raw": {
+          "cameraInfoTopic": "/robot_1/camera/camera_info"
         },
         "/robot_2/camera/image_raw": {
           "cameraInfoTopic": "/robot_2/camera/camera_info"
         },
-        "/robot_2/local_costmap/obstacle_layer": {
-          "visible": false
+        "/robot_3/camera/image_raw": {
+          "cameraInfoTopic": "/robot_3/camera/camera_info"
         }
       },
       "layers": {
@@ -465,18 +578,6 @@
       "imageMode": {}
     },
     "Image!3ah2v53": {
-      "cameraState": {
-        "distance": 20,
-        "perspective": true,
-        "phi": 60,
-        "target": [0, 0, 0],
-        "targetOffset": [0, 0, 0],
-        "targetOrientation": [0, 0, 0, 1],
-        "thetaOffset": 60,
-        "fovy": 45,
-        "near": 0.5,
-        "far": 5000
-      },
       "followMode": "follow-pose",
       "scene": {},
       "transforms": {},
@@ -494,13 +595,9 @@
       "synchronize": false,
       "imageMode": {
         "imageTopic": "/robot_0/camera/image_raw",
-        "colorMode": "gradient",
-        "colorMap": "turbo",
         "calibrationTopic": "/robot_0/camera/image_raw/camera_info",
         "rectifyImage": true
-      }
-    },
-    "Image!1nuetx": {
+      },
       "cameraState": {
         "distance": 20,
         "perspective": true,
@@ -512,7 +609,9 @@
         "fovy": 45,
         "near": 0.5,
         "far": 5000
-      },
+      }
+    },
+    "Image!1nuetx": {
       "followMode": "follow-pose",
       "scene": {},
       "transforms": {},
@@ -531,9 +630,7 @@
       "imageMode": {
         "imageTopic": "/robot_1/camera/image_raw",
         "calibrationTopic": "/robot_1/camera/image_raw/camera_info"
-      }
-    },
-    "Image!49o3yx6": {
+      },
       "cameraState": {
         "distance": 20,
         "perspective": true,
@@ -545,7 +642,9 @@
         "fovy": 45,
         "near": 0.5,
         "far": 5000
-      },
+      }
+    },
+    "Image!49o3yx6": {
       "followMode": "follow-pose",
       "scene": {},
       "transforms": {},
@@ -563,9 +662,52 @@
       "synchronize": false,
       "imageMode": {
         "imageTopic": "/robot_2/camera/image_raw",
-        "calibrationTopic": "/robot_2/camera/image_raw/camera_info",
-        "colorMode": "gradient",
-        "colorMap": "turbo"
+        "calibrationTopic": "/robot_2/camera/image_raw/camera_info"
+      },
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": 60,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      }
+    },
+    "Image!1nvag21": {
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {},
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "synchronize": false,
+      "imageMode": {
+        "imageTopic": "/robot_3/camera/image_raw",
+        "calibrationTopic": "/robot_3/camera/image_raw/camera_info"
+      },
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": 60,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
       }
     }
   },
@@ -577,16 +719,22 @@
   "layout": {
     "first": "3D!4hdne1a",
     "second": {
-      "first": "Image!3ah2v53",
+      "first": {
+        "first": "Image!3ah2v53",
+        "second": "Image!1nuetx",
+        "direction": "row",
+        "splitPercentage": 49.668874172185426
+      },
       "second": {
-        "first": "Image!1nuetx",
-        "second": "Image!49o3yx6",
-        "direction": "column"
+        "first": "Image!49o3yx6",
+        "second": "Image!1nvag21",
+        "direction": "row",
+        "splitPercentage": 49.50331125827815
       },
       "direction": "column",
-      "splitPercentage": 33.38695959900279
+      "splitPercentage": 47.21805860970246
     },
     "direction": "row",
-    "splitPercentage": 75.4488680718189
+    "splitPercentage": 58.113730929264904
   }
 }

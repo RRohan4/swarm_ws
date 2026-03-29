@@ -1,0 +1,35 @@
+# compose.record.yaml — overlay for bag-recording runs
+# Usage: make record   (or: docker compose -f compose.yaml -f compose.record.yaml up)
+#
+# Changes vs base:
+#   • sim runs uncapped (GZ_REAL_TIME_FACTOR=0) — no wall-clock throttle
+#   • recorder service auto-stops when all robots reach DONE
+
+services:
+  sim:
+    environment:
+      GZ_REAL_TIME_FACTOR: "0.0"
+
+  foxglove:
+    profiles: [foxglove] # disable — not needed during recording
+
+  # ── Bag recorder — auto-stops when all robots reach DONE ─────────────────────
+  # Bags are written to ./bags/ on the host.
+  recorder:
+    build: .
+    network_mode: host
+    ipc: host
+    environment:
+      GZ_IP: "127.0.0.1"
+      ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+      CYCLONEDDS_URI: "<CycloneDDS><Domain><Discovery><MaxAutoParticipantIndex>200</MaxAutoParticipantIndex></Discovery></Domain></CycloneDDS>"
+      SWARM_ROBOT_IDS: "robot_0,robot_1,robot_2,robot_3"
+      BAG_OUTPUT_DIR: "/bags"
+    volumes:
+      - /dev/shm:/dev/shm
+      - ./bags:/bags
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               python3 /ws/scripts/bag_recorder.py"
+    depends_on: [global]

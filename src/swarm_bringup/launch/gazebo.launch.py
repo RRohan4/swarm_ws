@@ -9,6 +9,8 @@ Args:
 """
 
 import os
+import re
+import tempfile
 from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
@@ -22,16 +24,42 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
+def _patched_world(source_sdf: str, rtf: float) -> str:
+    """Return path to a temp SDF with real_time_factor replaced by *rtf*.
+
+    The temp file persists for the lifetime of the process (delete=False) so
+    gz sim can open it after this function returns.
+    """
+    text = Path(source_sdf).read_text()
+    text = re.sub(
+        r"<real_time_factor>[^<]*</real_time_factor>",
+        f"<real_time_factor>{rtf}</real_time_factor>",
+        text,
+    )
+    tmp = tempfile.NamedTemporaryFile(
+        suffix=".sdf", prefix="maze_world_rtf_", delete=False
+    )
+    tmp.write(text.encode())
+    tmp.flush()
+    return tmp.name
+
+
 def generate_launch_description():
     bringup_dir = get_package_share_directory("swarm_bringup")
     tb3_dir = get_package_share_directory("nav2_minimal_tb3_sim")
-    default_world = os.path.join(bringup_dir, "worlds", "maze_world.sdf")
+    source_world = os.path.join(bringup_dir, "worlds", "maze_world.sdf")
+
+    rtf = float(os.environ.get("GZ_REAL_TIME_FACTOR", "1.0"))
+    if rtf != 1.0:
+        world_path = _patched_world(source_world, rtf)
+    else:
+        world_path = source_world
 
     return LaunchDescription(
         [
             DeclareLaunchArgument(
                 "world",
-                default_value=default_world,
+                default_value=world_path,
                 description="Path to Gazebo world SDF",
             ),
             # Gazebo needs these to find TB3 mesh assets when loading spawned models

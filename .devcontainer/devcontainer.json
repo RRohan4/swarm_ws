@@ -25,7 +25,8 @@
         "esbenp.prettier-vscode",
         "redhat.vscode-xml",
         "tamasfe.even-better-toml",
-        "anthropic.claude-code"
+        "anthropic.claude-code",
+        "ms-vscode.makefile-tools"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/bin/python3",
