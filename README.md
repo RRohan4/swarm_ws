@@ -4,7 +4,7 @@ ROS 2 workspace for multi-robot swarm exploration. Three TurtleBot3 Waffle robot
 
 Written in Python with ROS 2 Jazzy, the codebase includes SLAM, Nav2, a custom frontier detector, and a per-robot FSM. Robots coordinate via **geodesic Voronoi partitioning**: a simultaneous multi-source BFS divides the merged map so each robot owns the region it can reach fastest, then selects the nearest frontier within its partition. This eliminates duplicate work without any central coordinator. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for a full description.
 
-https://github.com/user-attachments/assets/085da9c2-b8fe-4d9b-aeb3-6b86ffb53e54
+![ezgif-5dca8da404a8c63b](https://github.com/user-attachments/assets/3e7e5409-2bfa-445c-80f0-fc237b1a7c50)
 
 ## Dev flow overview
 
@@ -27,7 +27,7 @@ The dev container forwards the host Docker socket, so `docker compose` commands 
 ### Steps
 
 1. Clone this repo and open the folder in VS Code.
-2. When prompted, click **Reopen in Container** — or `F1` → **Dev Containers: Reopen in Container**.
+2. When prompted, click **Reopen in Container** (or `F1` → **Dev Containers: Reopen in Container**).
 3. VS Code builds the image from [`.devcontainer/Dockerfile.dev`](.devcontainer/Dockerfile.dev) and mounts the workspace at `/ws`.
 4. `pre-commit install` runs automatically on first open.
 
