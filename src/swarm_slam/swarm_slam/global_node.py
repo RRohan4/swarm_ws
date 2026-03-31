@@ -9,17 +9,20 @@ Also tracks latest odom poses and publishes /robot_poses.
 Parameters:
   robot_ids  : list[str]  e.g. ["robot_0", "robot_1"]
   rate       : float      publish rate Hz (default 2.0)
+  robot_clear_radius : float  ignore occupied cells this close to robot centres
 """
 
 import math
+import os
 
 import numpy as np
 import rclpy
+from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Pose, PoseArray, TransformStamped
 from nav_msgs.msg import MapMetaData, OccupancyGrid, Odometry
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
-from std_msgs.msg import Header, String
+from std_msgs.msg import Float32, Header, String
 from tf2_ros import Buffer, TransformListener
 
 # QoS that matches slam_toolbox's latched map topic
@@ -28,6 +31,7 @@ MAP_QOS = QoSProfile(
     reliability=QoSReliabilityPolicy.RELIABLE,
     durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
 )
+MAZE_FREE_CELL_AREA_M2 = 1.5**2
 
 
 def _yaw_from_quat(q) -> float:
@@ -43,15 +47,22 @@ class GlobalNode(Node):
 
         self.declare_parameter("robot_ids", ["robot_0", "robot_1"])
         self.declare_parameter("rate", 2.0)
+        self.declare_parameter("robot_clear_radius", 0.55)
 
         robot_ids: list[str] = (
             self.get_parameter("robot_ids").get_parameter_value().string_array_value
         )
         rate: float = self.get_parameter("rate").get_parameter_value().double_value
+        self._robot_clear_radius: float = (
+            self.get_parameter("robot_clear_radius")
+            .get_parameter_value()
+            .double_value
+        )
 
         self._robot_ids = robot_ids
         self._maps: dict[str, OccupancyGrid] = {}
         self._poses: dict[str, Pose] = {}
+        self._maze_total_free_area_m2 = self._load_maze_total_free_area()
 
         # TF2 for looking up world → robot_N/map transforms
         self._tf_buf = Buffer()
@@ -75,6 +86,7 @@ class GlobalNode(Node):
         self._merged_pub = self.create_publisher(OccupancyGrid, "/merged_map", MAP_QOS)
         self._poses_pub = self.create_publisher(PoseArray, "/robot_poses", 10)
         self._ids_pub = self.create_publisher(String, "/robot_ids", MAP_QOS)
+        self._explore_pct_pub = self.create_publisher(Float32, "/exploration_pct", 10)
 
         self.create_timer(1.0 / rate, self._publish)
         self.get_logger().info(f"global_node started — tracking {robot_ids}")
@@ -106,15 +118,70 @@ class GlobalNode(Node):
             )
             return None
 
+    def _load_maze_total_free_area(self) -> float:
+        """Read maze.txt and convert open cells into total explorable area."""
+        try:
+            bringup_dir = get_package_share_directory("swarm_bringup")
+            maze_path = os.path.join(bringup_dir, "worlds", "maze.txt")
+            with open(maze_path, encoding="ascii") as maze_file:
+                free_cells = sum(line.count(" ") for line in maze_file)
+            total_free_area = free_cells * MAZE_FREE_CELL_AREA_M2
+            self.get_logger().info(
+                f"Loaded maze free area {total_free_area:.1f} m^2 from {maze_path}"
+            )
+            return total_free_area
+        except Exception as e:
+            self.get_logger().warn(f"Failed to load maze free area from maze.txt: {e}")
+            return 0.0
+
+    def _get_world_robot_poses(self) -> dict[str, Pose]:
+        """Transform each robot odom pose into the world frame."""
+        world_poses: dict[str, Pose] = {}
+        for rid, raw in self._poses.items():
+            try:
+                tf: TransformStamped = self._tf_buf.lookup_transform(
+                    "world", f"{rid}/odom", rclpy.time.Time()
+                )
+                t = tf.transform.translation
+                yaw = _yaw_from_quat(tf.transform.rotation)
+                cos_y = math.cos(yaw)
+                sin_y = math.sin(yaw)
+
+                p = Pose()
+                p.position.x = t.x + cos_y * raw.position.x - sin_y * raw.position.y
+                p.position.y = t.y + sin_y * raw.position.x + cos_y * raw.position.y
+                p.position.z = raw.position.z
+                p.orientation = raw.orientation
+                world_poses[rid] = p
+            except Exception as e:
+                self.get_logger().warn(
+                    f"TF world→{rid}/odom unavailable: {e}",
+                    throttle_duration_sec=10.0,
+                )
+        return world_poses
+
     # ── Merge and publish ──────────────────────────────────────────────────────
 
     def _publish(self) -> None:
         if not self._maps:
             return
 
-        merged = self._merge_maps()
+        world_pose_map = self._get_world_robot_poses()
+        merged = self._merge_maps(world_pose_map)
         if merged is not None:
             self._merged_pub.publish(merged)
+            # Exploration % = known free area / total maze free area * 100
+            data = np.array(merged.data, dtype=np.int8)
+            known_free_area_m2 = (
+                float(np.count_nonzero(data == 0)) * (merged.info.resolution**2)
+            )
+            total_free_area_m2 = self._maze_total_free_area_m2
+            pct = (
+                min(known_free_area_m2 / total_free_area_m2 * 100.0, 100.0)
+                if total_free_area_m2 > 0.0
+                else 0.0
+            )
+            self._explore_pct_pub.publish(Float32(data=float(pct)))
 
         # Broadcast robot ID list so FSM nodes can discover peers dynamically.
         self._ids_pub.publish(String(data=",".join(self._robot_ids)))
@@ -125,40 +192,14 @@ class GlobalNode(Node):
         # get a zero Pose() placeholder; FSM nodes must skip those.
         world_poses: list[Pose] = []
         for rid in self._robot_ids:
-            if rid not in self._poses:
-                world_poses.append(Pose())  # placeholder — keeps index alignment
-                continue
-            raw = self._poses[rid]
-            # Transform odom-frame position into world frame via TF.
-            try:
-                tf: TransformStamped = self._tf_buf.lookup_transform(
-                    "world", f"{rid}/odom", rclpy.time.Time()
-                )
-                t = tf.transform.translation
-                yaw = _yaw_from_quat(tf.transform.rotation)
-                cos_y = math.cos(yaw)
-                sin_y = math.sin(yaw)
-                ox = raw.position.x
-                oy = raw.position.y
-                p = Pose()
-                p.position.x = t.x + cos_y * ox - sin_y * oy
-                p.position.y = t.y + sin_y * ox + cos_y * oy
-                p.position.z = raw.position.z
-                p.orientation = raw.orientation
-                world_poses.append(p)
-            except Exception as e:
-                self.get_logger().warn(
-                    f"TF world→{rid}/odom unavailable: {e}",
-                    throttle_duration_sec=10.0,
-                )
-                world_poses.append(Pose())  # placeholder if TF not ready
+            world_poses.append(world_pose_map.get(rid, Pose()))
         if world_poses:
             pa = PoseArray()
             pa.header = Header(stamp=self.get_clock().now().to_msg(), frame_id="world")
             pa.poses = world_poses
             self._poses_pub.publish(pa)
 
-    def _merge_maps(self) -> OccupancyGrid | None:
+    def _merge_maps(self, world_pose_map: dict[str, Pose]) -> OccupancyGrid | None:
         """Transform each robot's map into world coords, then merge."""
         if not self._maps:
             return None
@@ -224,6 +265,11 @@ class GlobalNode(Node):
             return None
 
         merged = np.full((merged_h, merged_w), -1, dtype=np.int8)
+        robot_positions = np.array(
+            [[pose.position.x, pose.position.y] for pose in world_pose_map.values()],
+            dtype=np.float64,
+        )
+        robot_clear_radius_sq = self._robot_clear_radius**2
 
         # Place each map into the merged grid
         for arr, world_ox, world_oy, total_yaw, r in map_data:
@@ -263,7 +309,23 @@ class GlobalNode(Node):
             merged[di[free_idx[dst_unknown_free]], dj[free_idx[dst_unknown_free]]] = 0
 
             occupied = src == 100
-            merged[di[occupied], dj[occupied]] = 100
+            occ_idx = np.where(occupied)[0]
+            if len(occ_idx) == 0:
+                continue
+
+            occ_di = di[occ_idx]
+            occ_dj = dj[occ_idx]
+
+            if robot_positions.size > 0:
+                occ_wx = min_wx + (occ_dj + 0.5) * res
+                occ_wy = min_wy + (occ_di + 0.5) * res
+                dx = occ_wx[:, None] - robot_positions[:, 0]
+                dy = occ_wy[:, None] - robot_positions[:, 1]
+                keep = np.all(dx * dx + dy * dy > robot_clear_radius_sq, axis=1)
+                occ_di = occ_di[keep]
+                occ_dj = occ_dj[keep]
+
+            merged[occ_di, occ_dj] = 100
 
         out = OccupancyGrid()
         out.header = Header(

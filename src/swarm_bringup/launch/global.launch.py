@@ -31,6 +31,7 @@ def launch_setup(context, *args, **kwargs):
                     "use_sim_time": True,
                     "robot_ids": robot_ids,
                     "rate": rate,
+                    "robot_clear_radius": 0.55,
                 }
             ],
             output="screen",
@@ -42,7 +43,8 @@ def launch_setup(context, *args, **kwargs):
             parameters=[
                 {
                     "use_sim_time": True,
-                    "min_frontier_size": 5,
+                    "min_frontier_size": 3,
+                    "min_unknown_backing": 4,
                     "detect_rate": 5.0,
                 }
             ],

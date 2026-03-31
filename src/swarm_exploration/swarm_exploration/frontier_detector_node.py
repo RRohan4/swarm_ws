@@ -8,10 +8,10 @@ and publishes:
   /frontier_markers (visualization_msgs/MarkerArray)
 
 Parameters:
-  min_frontier_size  : int    minimum cluster size to publish (default 5)
+  min_frontier_size  : int    minimum cluster size to publish (default 3)
   detect_rate        : float  Hz (default 2.0)
   merge_distance     : float  merge centroids within this distance metres (default 0.3)
-  min_unknown_backing: int    minimum unique unknown neighbours per cluster (default 10)
+  min_unknown_backing: int    minimum unique unknown neighbours per cluster (default 4)
 """
 
 import numpy as np
@@ -37,10 +37,10 @@ class FrontierDetectorNode(Node):
     def __init__(self):
         super().__init__("frontier_detector_node")
 
-        self.declare_parameter("min_frontier_size", 5)
+        self.declare_parameter("min_frontier_size", 3)
         self.declare_parameter("detect_rate", 5.0)
         self.declare_parameter("merge_distance", 0.3)
-        self.declare_parameter("min_unknown_backing", 10)
+        self.declare_parameter("min_unknown_backing", 4)
 
         self._min_size: int = (
             self.get_parameter("min_frontier_size").get_parameter_value().integer_value
@@ -138,9 +138,24 @@ class FrontierDetectorNode(Node):
                 if len(cells_r) < self._min_size:
                     continue
 
-                # Vectorised unknown-neighbor count (replaces nested Python loop)
-                nr = np.concatenate([cells_r - 1, cells_r + 1, cells_r, cells_r])
-                nc = np.concatenate([cells_c, cells_c, cells_c - 1, cells_c + 1])
+                # Count backing unknown cells across the full 8-neighbourhood.
+                # The old 4-neighbour check undercounted diagonal and curved
+                # frontiers, causing short but valid frontier runs to be dropped.
+                offsets = np.array(
+                    [
+                        (-1, -1),
+                        (-1, 0),
+                        (-1, 1),
+                        (0, -1),
+                        (0, 1),
+                        (1, -1),
+                        (1, 0),
+                        (1, 1),
+                    ],
+                    dtype=np.int16,
+                )
+                nr = (cells_r[:, None] + offsets[:, 0]).reshape(-1)
+                nc = (cells_c[:, None] + offsets[:, 1]).reshape(-1)
                 in_bounds = (nr >= 0) & (nr < h) & (nc >= 0) & (nc < w)
                 nr, nc = nr[in_bounds], nc[in_bounds]
                 is_unk = unknown[nr, nc]
@@ -149,7 +164,10 @@ class FrontierDetectorNode(Node):
                     if is_unk.any()
                     else 0
                 )
-                if unique_unk < self._min_unknown_backing:
+                required_unknown_backing = min(
+                    self._min_unknown_backing, max(2, len(cells_r))
+                )
+                if unique_unk < required_unknown_backing:
                     continue
 
                 # Snap centroid to nearest frontier cell (medoid)

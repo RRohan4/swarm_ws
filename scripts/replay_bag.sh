@@ -9,44 +9,118 @@
 
 set -euo pipefail
 
-BAG_DIR="${BAG_DIR:-./bags}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+BAG_DIR="${BAG_DIR:-${REPO_ROOT}/bags}"
 RATE="${RATE:-10}"
 FOXGLOVE_PORT="${FOXGLOVE_PORT:-8765}"
+ROBOT_IDS_CSV="${ROBOT_IDS:-robot_0,robot_1,robot_2,robot_3}"
+ROBOT_URDF="${ROBOT_URDF:-${REPO_ROOT}/src/swarm_exploration/urdf/turtlebot3_waffle.urdf}"
+DEFAULT_POSES=(
+  "0.6 0.6 0 1.5708"
+  "1.8 0.6 0 1.5708"
+  "0.6 1.8 0 1.5708"
+  "1.8 1.8 0 1.5708"
+)
 
 if [[ $# -ge 1 ]]; then
   BAG_PATH="$1"
 else
-  BAG_PATH=$(ls -dt "${BAG_DIR}"/exploration_* 2>/dev/null | head -1)
-  if [[ -z "$BAG_PATH" ]]; then
+  shopt -s nullglob
+  bag_candidates=("${BAG_DIR}"/exploration_*)
+  shopt -u nullglob
+  if [[ ${#bag_candidates[@]} -eq 0 ]]; then
     echo "No bags found in ${BAG_DIR}. Run a recording first." >&2
     exit 1
   fi
+  IFS=$'\n' bag_candidates=($(printf '%s\n' "${bag_candidates[@]}" | sort -r))
+  unset IFS
+  BAG_PATH="${bag_candidates[0]}"
 fi
 
 echo "Replaying: $BAG_PATH  (rate=${RATE}x)"
-echo "Connect Foxglove to ws://localhost:${FOXGLOVE_PORT}"
-echo
 
-# Source ROS if not already sourced
+# ROS setup scripts read some optional variables before defining them, which
+# breaks under `set -u`. Temporarily relax nounset while sourcing overlays.
+source_ros_setup() {
+  set +u
+  # shellcheck disable=SC1090
+  source "$1"
+  set -u
+}
+
+# Always source the workspace overlay when available so replay can deserialize
+# custom messages from the bag (for example swarm_msgs/*).
+if [[ -f /opt/ros/jazzy/setup.bash ]]; then
+  source_ros_setup /opt/ros/jazzy/setup.bash
+fi
+if [[ -f "${REPO_ROOT}/install/setup.bash" ]]; then
+  source_ros_setup "${REPO_ROOT}/install/setup.bash"
+fi
 if ! command -v ros2 &>/dev/null; then
-  # shellcheck disable=SC1091
-  source /ws/install/setup.bash
+  echo "ROS 2 environment not found. Source your workspace first." >&2
+  exit 1
+fi
+if [[ ! -f "${ROBOT_URDF}" ]]; then
+  echo "Robot URDF not found at ${ROBOT_URDF}" >&2
+  exit 1
 fi
 
-# Start Foxglove bridge (background), then play the bag
+IFS=',' read -r -a ROBOT_IDS_ARR <<< "${ROBOT_IDS_CSV}"
+ROBOT_DESCRIPTION="$(<"${ROBOT_URDF}")"
+
+# Start Foxglove bridge and robot_state_publishers, then play the bag
 ros2 run foxglove_bridge foxglove_bridge \
   --ros-args -p port:="${FOXGLOVE_PORT}" -p use_sim_time:=true &
 FOXGLOVE_PID=$!
 
+RSP_PIDS=()
+for robot_id in "${ROBOT_IDS_ARR[@]}"; do
+  ros2 run robot_state_publisher robot_state_publisher \
+    --ros-args \
+    -r __ns:="/${robot_id}" \
+    -p use_sim_time:=true \
+    -p frame_prefix:="${robot_id}/" \
+    -p robot_description:="${ROBOT_DESCRIPTION}" &
+  RSP_PIDS+=($!)
+done
+
+STATIC_TF_PIDS=()
+for i in "${!ROBOT_IDS_ARR[@]}"; do
+  robot_id="${ROBOT_IDS_ARR[$i]}"
+  pose="${DEFAULT_POSES[$i]:-${DEFAULT_POSES[-1]}}"
+  IFS=' ' read -r px py pz pyaw <<< "${pose}"
+  ros2 run tf2_ros static_transform_publisher \
+    --x "${px}" \
+    --y "${py}" \
+    --z "${pz}" \
+    --yaw "${pyaw}" \
+    --pitch 0 \
+    --roll 0 \
+    --frame-id world \
+    --child-frame-id "${robot_id}/map" &
+  STATIC_TF_PIDS+=($!)
+done
+
 cleanup() {
   kill "$FOXGLOVE_PID" 2>/dev/null || true
+  for pid in "${RSP_PIDS[@]}"; do
+    kill "$pid" 2>/dev/null || true
+  done
+  for pid in "${STATIC_TF_PIDS[@]}"; do
+    kill "$pid" 2>/dev/null || true
+  done
 }
 trap cleanup EXIT
 
 # Brief pause so the bridge is ready before playback starts
 sleep 2
 
+echo "Connect Foxglove to ws://localhost:${FOXGLOVE_PORT}"
+echo "Press Enter after Foxglove is connected so it receives /tf_static."
+read -r
+
 ros2 bag play "$BAG_PATH" \
   --rate "$RATE" \
-  --clock \
-  --loop
+  --clock

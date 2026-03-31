@@ -53,6 +53,9 @@ COPY src/swarm_bringup/ src/swarm_bringup/
 RUN . /opt/ros/jazzy/setup.sh && . install/setup.sh \
     && colcon build --symlink-install --packages-select swarm_bringup
 
+# runtime helper scripts (bag recorder, etc.)
+COPY scripts/ scripts/
+
 SHELL ["/bin/bash", "-c"]
 
 # ── Regression-test stage ─────────────────────────────────────────────────────

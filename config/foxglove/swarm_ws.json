@@ -3,12 +3,25 @@
     "3D!4hdne1a": {
       "cameraState": {
         "perspective": false,
-        "distance": 35.16173831821235,
+        "distance": 43.169390435251835,
         "phi": 0.00005729832627056611,
-        "thetaOffset": -0.20298914616688152,
-        "targetOffset": [0, 0, 0],
-        "target": [0, 0, 0],
-        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": 48.377354263484946,
+        "targetOffset": [
+          -0.4239988840536912,
+          2.7569932652838003,
+          -7.855410856242851e-23
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
         "fovy": 45,
         "near": 0.5,
         "far": 5000
@@ -319,7 +332,11 @@
           "type": "arrow",
           "showCovariance": false,
           "color": "#c1b041ff",
-          "arrowScale": [0.479, 0.098, 1.364]
+          "arrowScale": [
+            0.479,
+            0.098,
+            1.364
+          ]
         },
         "/robot_0/goal_markers": {
           "visible": true,
@@ -379,7 +396,11 @@
           "visible": true,
           "type": "arrow",
           "color": "#c1b041ff",
-          "arrowScale": [0.479, 0.098, 1.364],
+          "arrowScale": [
+            0.479,
+            0.098,
+            1.364
+          ],
           "showCovariance": false
         },
         "/robot_1/goal_markers": {
@@ -427,7 +448,11 @@
         "/robot_2/pose": {
           "visible": true,
           "type": "arrow",
-          "arrowScale": [0.479, 0.098, 1.364],
+          "arrowScale": [
+            0.479,
+            0.098,
+            1.364
+          ],
           "color": "#c1b041ff"
         },
         "/robot_2/goal_markers": {
@@ -463,7 +488,11 @@
         "/robot_3/pose": {
           "visible": true,
           "type": "arrow",
-          "arrowScale": [0.479, 0.098, 1.364],
+          "arrowScale": [
+            0.479,
+            0.098,
+            1.364
+          ],
           "color": "#c1b041ff"
         },
         "/robot_3/goal_markers": {
@@ -493,7 +522,11 @@
         "/robot_4/pose": {
           "visible": true,
           "type": "arrow",
-          "arrowScale": [0.479, 0.098, 1.364],
+          "arrowScale": [
+            0.479,
+            0.098,
+            1.364
+          ],
           "color": "#c1b041ff"
         },
         "/robot_4/goal_markers": {
@@ -523,7 +556,11 @@
         "/robot_5/pose": {
           "visible": true,
           "type": "arrow",
-          "arrowScale": [0.479, 0.098, 1.364],
+          "arrowScale": [
+            0.479,
+            0.098,
+            1.364
+          ],
           "color": "#c1b041ff"
         },
         "/robot_5/goal_markers": {
@@ -561,8 +598,16 @@
           "divisions": 10,
           "lineWidth": 1,
           "color": "#248eff",
-          "position": [0, 0, 0],
-          "rotation": [0, 0, 0]
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
         }
       },
       "publish": {
@@ -576,6 +621,21 @@
       },
       "synchronize": false,
       "imageMode": {}
+    },
+    "Gauge!2tcosw5": {
+      "path": "/exploration_progress.data",
+      "style": "bar",
+      "minValue": 0,
+      "maxValue": 100,
+      "colorMap": "red-yellow-green",
+      "colorMode": "gradient",
+      "gradient": [
+        "#0000ff",
+        "#ff00ff"
+      ],
+      "reverse": false,
+      "reverseDirection": false,
+      "foxglovePanelTitle": ""
     },
     "Image!3ah2v53": {
       "followMode": "follow-pose",
@@ -602,9 +662,22 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [0, 0, 0],
-        "targetOffset": [0, 0, 0],
-        "targetOrientation": [0, 0, 0, 1],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -635,9 +708,68 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [0, 0, 0],
-        "targetOffset": [0, 0, 0],
-        "targetOrientation": [0, 0, 0, 1],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "thetaOffset": 60,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      }
+    },
+    "Image!robot4cam": {
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {},
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "synchronize": false,
+      "imageMode": {
+        "imageTopic": "/robot_4/camera/image_raw",
+        "calibrationTopic": "/robot_4/camera/image_raw/camera_info"
+      },
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -668,9 +800,22 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [0, 0, 0],
-        "targetOffset": [0, 0, 0],
-        "targetOrientation": [0, 0, 0, 1],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -701,9 +846,68 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [0, 0, 0],
-        "targetOffset": [0, 0, 0],
-        "targetOrientation": [0, 0, 0, 1],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "thetaOffset": 60,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      }
+    },
+    "Image!robot5cam": {
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {},
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "synchronize": false,
+      "imageMode": {
+        "imageTopic": "/robot_5/camera/image_raw",
+        "calibrationTopic": "/robot_5/camera/image_raw/camera_info"
+      },
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -717,24 +921,38 @@
     "speed": 1
   },
   "layout": {
-    "first": "3D!4hdne1a",
+    "first": {
+      "first": "3D!4hdne1a",
+      "second": "Gauge!2tcosw5",
+      "direction": "column",
+      "splitPercentage": 89.5051474610832
+    },
     "second": {
       "first": {
         "first": "Image!3ah2v53",
-        "second": "Image!1nuetx",
+        "second": {
+          "first": "Image!1nuetx",
+          "second": "Image!robot4cam",
+          "direction": "row",
+          "splitPercentage": 98
+        },
         "direction": "row",
-        "splitPercentage": 49.668874172185426
+        "splitPercentage": 48.77102199223805
       },
       "second": {
         "first": "Image!49o3yx6",
-        "second": "Image!1nvag21",
-        "direction": "row",
-        "splitPercentage": 49.50331125827815
+        "second": {
+          "first": "Image!1nvag21",
+          "second": "Image!robot5cam",
+          "direction": "row",
+          "splitPercentage": 98
+        },
+        "direction": "row"
       },
       "direction": "column",
       "splitPercentage": 47.21805860970246
     },
     "direction": "row",
-    "splitPercentage": 58.113730929264904
+    "splitPercentage": 53.901170351105335
   }
 }

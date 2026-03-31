@@ -26,6 +26,8 @@ services:
       CYCLONEDDS_URI: "<CycloneDDS><Domain><Discovery><MaxAutoParticipantIndex>200</MaxAutoParticipantIndex></Discovery></Domain></CycloneDDS>"
       SWARM_ROBOT_IDS: "robot_0,robot_1,robot_2,robot_3"
       BAG_OUTPUT_DIR: "/bags"
+      EXPLORE_CUTOFF: "${EXPLORE_CUTOFF:-0}"
+      TIMEOUT_CUTOFF: "${TIMEOUT_CUTOFF:-0}"
     volumes:
       - /dev/shm:/dev/shm
       - ./bags:/bags

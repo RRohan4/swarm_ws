@@ -82,6 +82,8 @@ Run headless at maximum simulation speed and record a bag (auto-stops when all r
 ```bash
 make record           # headless only
 make record FOXGLOVE=1  # also start the Foxglove bridge
+make record EXPLORE=60  # stop at 60% exploration
+make record TIMEOUT=300  # stop after 300 seconds
 ```
 
 Bags are written to `./bags/`.
