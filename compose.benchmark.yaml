@@ -29,8 +29,7 @@ services:
       - /dev/shm:/dev/shm
     command: >
       bash -c ". /ws/install/setup.sh &&
-               ros2 launch swarm_bringup swarm.launch.py
-               num_robots:=${NUM_ROBOTS:-4}"
+               ros2 launch swarm_bringup swarm.launch.py num_robots:=${NUM_ROBOTS:-4}"
 
   # ── Measurement node — exits when target % reached; drives --exit-code-from ──
   measurer:
