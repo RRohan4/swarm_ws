@@ -376,8 +376,10 @@ def main() -> None:
     print()
     print(f"  {cyan(bold('Results'))}  {dim(f'({elapsed_total:.0f}s total)')}")
     print(f"  {dim('━' * min(cols - 4, 52))}")
-    print(f"  {bold(f'{'Robots':<8}  {'Sim (s)':>14}  {'Wall (s)':>14}')}")
-    print(f"  {dim(f'{'─' * 8}  {'─' * 14}  {'─' * 14}')}")
+    summary_header = f"{'Robots':<8}  {'Sim (s)':>14}  {'Wall (s)':>14}"
+    summary_rule = f"{'─' * 8}  {'─' * 14}  {'─' * 14}"
+    print(f"  {bold(summary_header)}")
+    print(f"  {dim(summary_rule)}")
 
     for n in robots:
         ok = [r for r in results if r.num_robots == n and r.success]
