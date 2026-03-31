@@ -119,11 +119,18 @@ def teardown() -> None:
             "compose.benchmark.yaml",
             "down",
             "--remove-orphans",
-            "--volumes",
         ],
         cwd=WS,
         capture_output=True,
     )
+
+
+def build_images() -> bool:
+    proc = subprocess.run(
+        ["docker", "compose", "-f", "compose.benchmark.yaml", "build"],
+        cwd=WS,
+    )
+    return proc.returncode == 0
 
 
 def run_single(
@@ -137,7 +144,7 @@ def run_single(
     result = RunResult(num_robots=n_robots, run_idx=run_idx)
     label = f"{n_robots} robot(s), run {run_idx}/{runs_total}"
 
-    write_progress(f"{label}  {dim('building image …')}")
+    write_progress(f"{label}  {dim('starting containers …')}")
 
     env = {
         **os.environ,
@@ -153,7 +160,6 @@ def run_single(
             "-f",
             "compose.benchmark.yaml",
             "up",
-            "--build",
             "--abort-on-container-exit",
             "--exit-code-from",
             "measurer",
@@ -175,45 +181,54 @@ def run_single(
     write_progress(f"{label}  {yellow('waiting for frontiers …')}")
 
     try:
-        for line in proc.stdout:
-            stripped = line.strip()
+        if proc.stdout is None:
+            result.error = "missing compose stdout pipe"
+            proc.wait(timeout=10)
+            result.finished = True
+        else:
+            for line in proc.stdout:
+                stripped = line.strip()
 
-            if "Timer started" in stripped and phase == "waiting":
-                phase = "exploring"
+                if "Timer started" in stripped and phase == "waiting":
+                    phase = "exploring"
 
-            elif "BENCHMARK_PROGRESS:" in stripped:
-                phase = "exploring"
-                try:
-                    after = stripped.split("BENCHMARK_PROGRESS:")[1].strip()
-                    pct_str, rest = after.split("%", 1)
-                    cur_pct = float(pct_str.strip())
-                    if "sim=" in rest:
-                        cur_sim = float(rest.split("sim=")[1].replace("s", "").strip())
-                except (ValueError, IndexError):
-                    pass
+                elif "BENCHMARK_PROGRESS:" in stripped:
+                    phase = "exploring"
+                    try:
+                        after = stripped.split("BENCHMARK_PROGRESS:")[1].strip()
+                        pct_str, rest = after.split("%", 1)
+                        cur_pct = float(pct_str.strip())
+                        if "sim=" in rest:
+                            cur_sim = float(
+                                rest.split("sim=")[1].replace("s", "").strip()
+                            )
+                    except (ValueError, IndexError):
+                        pass
 
-            elif "BENCHMARK_RESULT:" in stripped:
-                try:
-                    data = json.loads(stripped.split("BENCHMARK_RESULT:")[1].strip())
-                    result.sim_s = data["elapsed_sim_s"]
-                    result.wall_s = data["elapsed_wall_s"]
-                    result.achieved_pct = data["achieved_pct"]
-                    result.success = data["success"]
-                    result.finished = True
-                    cur_pct = data["achieved_pct"]
-                except (ValueError, IndexError, KeyError):
-                    pass
-            else:
-                continue
+                elif "BENCHMARK_RESULT:" in stripped:
+                    try:
+                        data = json.loads(
+                            stripped.split("BENCHMARK_RESULT:")[1].strip()
+                        )
+                        result.sim_s = data["elapsed_sim_s"]
+                        result.wall_s = data["elapsed_wall_s"]
+                        result.achieved_pct = data["achieved_pct"]
+                        result.success = data["success"]
+                        result.finished = True
+                        cur_pct = data["achieved_pct"]
+                    except (ValueError, IndexError, KeyError):
+                        pass
+                else:
+                    continue
 
-            if phase == "exploring":
-                bar = progress_bar(cur_pct, bar_width, target)
-                write_progress(
-                    f"{label}  {bar}  {bold(f'{cur_pct:.1f}%')}"
-                    f"  {dim(f'sim={cur_sim:.0f}s')}"
-                )
+                if phase == "exploring":
+                    bar = progress_bar(cur_pct, bar_width, target)
+                    write_progress(
+                        f"{label}  {bar}  {bold(f'{cur_pct:.1f}%')}"
+                        f"  {dim(f'sim={cur_sim:.0f}s')}"
+                    )
 
-        proc.wait()
+            proc.wait()
     except KeyboardInterrupt:
         proc.terminate()
         proc.wait(timeout=10)
@@ -358,6 +373,13 @@ def main() -> None:
         f"Runs: {bold(str(args.runs))}  "
         f"Timeout: {dim(f'{args.timeout:.0f}s')}"
     )
+    print(f"  {dim('Building benchmark images once …')}")
+
+    if not build_images():
+        print(f"  {red('Image build failed. Aborting benchmark.')}")
+        sys.exit(2)
+
+    print(f"  {green('Build complete.')}")
     print()
 
     results: list[RunResult] = []

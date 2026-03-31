@@ -31,6 +31,7 @@ from swarm_msgs.msg import FrontierArray
 EXPLORE_TARGET = float(os.environ.get("EXPLORE_TARGET", "80.0"))
 RESULTS_FILE = os.environ.get("RESULTS_FILE", "")
 SIM_TIMEOUT_S = float(os.environ.get("SIM_TIMEOUT_S", "1800"))
+WATCHDOG_WALL_S = float(os.environ.get("BENCHMARK_WATCHDOG_S", "1.0"))
 NUM_ROBOTS = os.environ.get("NUM_ROBOTS", "?")
 
 
@@ -48,14 +49,14 @@ class ExplorationMeasurer(Node):
         self.create_subscription(FrontierArray, "/frontiers", self._on_frontiers, 10)
         self.create_subscription(Float32, "/exploration_pct", self._on_explore_pct, 10)
 
-        # Watchdog fires every 5 wall-clock seconds: check timeout + log progress.
-        self._watchdog = self.create_timer(5.0, self._check_timeout)
+        # Faster watchdog avoids extra wall-time after sim-time timeout.
+        self._watchdog = self.create_timer(WATCHDOG_WALL_S, self._check_timeout)
         self._last_progress_pct: float = -1.0
 
         self.get_logger().info(
             f"Waiting for first frontiers to start timer "
             f"(target={EXPLORE_TARGET}%, sim_timeout={SIM_TIMEOUT_S}s, "
-            f"robots={NUM_ROBOTS})."
+            f"robots={NUM_ROBOTS}, watchdog={WATCHDOG_WALL_S:.1f}s)."
         )
 
     # ── Clock tracking ─────────────────────────────────────────────────────────
