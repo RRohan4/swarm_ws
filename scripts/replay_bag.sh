@@ -15,6 +15,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BAG_DIR="${BAG_DIR:-${REPO_ROOT}/bags}"
 RATE="${RATE:-10}"
 FOXGLOVE_PORT="${FOXGLOVE_PORT:-8765}"
+START_DELAY="${START_DELAY:-5}"
 ROBOT_IDS_CSV="${ROBOT_IDS:-robot_0,robot_1,robot_2,robot_3}"
 ROBOT_URDF="${ROBOT_URDF:-${REPO_ROOT}/src/swarm_exploration/urdf/turtlebot3_waffle.urdf}"
 DEFAULT_POSES=(
@@ -69,11 +70,14 @@ fi
 
 IFS=',' read -r -a ROBOT_IDS_ARR <<< "${ROBOT_IDS_CSV}"
 ROBOT_DESCRIPTION="$(<"${ROBOT_URDF}")"
+CHILD_PIDS=()
+cleanup_ran=0
 
 # Start Foxglove bridge and robot_state_publishers, then play the bag
 ros2 run foxglove_bridge foxglove_bridge \
   --ros-args -p port:="${FOXGLOVE_PORT}" -p use_sim_time:=true &
 FOXGLOVE_PID=$!
+CHILD_PIDS+=("${FOXGLOVE_PID}")
 
 RSP_PIDS=()
 for robot_id in "${ROBOT_IDS_ARR[@]}"; do
@@ -84,6 +88,7 @@ for robot_id in "${ROBOT_IDS_ARR[@]}"; do
     -p frame_prefix:="${robot_id}/" \
     -p robot_description:="${ROBOT_DESCRIPTION}" &
   RSP_PIDS+=($!)
+  CHILD_PIDS+=($!)
 done
 
 STATIC_TF_PIDS=()
@@ -101,18 +106,30 @@ for i in "${!ROBOT_IDS_ARR[@]}"; do
     --frame-id world \
     --child-frame-id "${robot_id}/map" &
   STATIC_TF_PIDS+=($!)
+  CHILD_PIDS+=($!)
 done
 
 cleanup() {
-  kill "$FOXGLOVE_PID" 2>/dev/null || true
-  for pid in "${RSP_PIDS[@]}"; do
-    kill "$pid" 2>/dev/null || true
+  if [[ ${cleanup_ran} -eq 1 ]]; then
+    return
+  fi
+  cleanup_ran=1
+  for pid in "${CHILD_PIDS[@]}"; do
+    kill -TERM "$pid" 2>/dev/null || true
   done
-  for pid in "${STATIC_TF_PIDS[@]}"; do
-    kill "$pid" 2>/dev/null || true
+  sleep 1
+  for pid in "${CHILD_PIDS[@]}"; do
+    kill -KILL "$pid" 2>/dev/null || true
   done
+  wait "${CHILD_PIDS[@]}" 2>/dev/null || true
+}
+
+handle_interrupt() {
+  cleanup
+  exit 130
 }
 trap cleanup EXIT
+trap handle_interrupt INT TERM
 
 # Brief pause so the bridge is ready before playback starts
 sleep 2
@@ -120,7 +137,14 @@ sleep 2
 echo "Connect Foxglove to ws://localhost:${FOXGLOVE_PORT}"
 echo "Press Enter after Foxglove is connected so it receives /tf_static."
 read -r
+echo "Starting playback in ${START_DELAY} seconds..."
+sleep "${START_DELAY}"
 
 ros2 bag play "$BAG_PATH" \
   --rate "$RATE" \
-  --clock
+  --clock &
+PLAY_PID=$!
+CHILD_PIDS+=("${PLAY_PID}")
+wait "${PLAY_PID}"
+cleanup
+exit 0
