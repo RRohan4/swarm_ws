@@ -1,0 +1,10 @@
+Benchmark: time to 50% exploration
+
+Robots           Sim (s)        Wall (s)
+────────  ──────────────  ──────────────
+1                   84.8            93.1
+2                   91.2           100.0
+3                   89.5            99.2
+4                   81.5            90.6
+
+Total benchmark time: 534s

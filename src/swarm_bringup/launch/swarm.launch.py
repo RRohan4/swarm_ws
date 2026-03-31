@@ -10,6 +10,8 @@ Args:
 """
 
 import os
+import re
+import tempfile
 from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
@@ -26,6 +28,23 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
+
+def _patched_world(source_sdf: str, rtf: float) -> str:
+    """Return a temp SDF path with real_time_factor replaced by *rtf*."""
+    text = Path(source_sdf).read_text()
+    text = re.sub(
+        r"<real_time_factor>[^<]*</real_time_factor>",
+        f"<real_time_factor>{rtf}</real_time_factor>",
+        text,
+    )
+    tmp = tempfile.NamedTemporaryFile(
+        suffix=".sdf", prefix="maze_world_rtf_", delete=False
+    )
+    tmp.write(text.encode())
+    tmp.flush()
+    return tmp.name
+
+
 # Spawn poses for up to 8 robots (extend as needed)
 SPAWN_POSES = [
     {"x": "0.6", "y": "0.6", "z": "0.05", "yaw": "1.5708"},  # robot_0
@@ -38,6 +57,9 @@ SPAWN_POSES = [
 def launch_setup(context, *args, **kwargs):
     num_robots = int(LaunchConfiguration("num_robots").perform(context))
     world = LaunchConfiguration("world").perform(context)
+    rtf = float(os.environ.get("GZ_REAL_TIME_FACTOR", "1.0"))
+    if rtf != 1.0:
+        world = _patched_world(world, rtf)
 
     bringup_dir = get_package_share_directory("swarm_bringup")
     tb3_dir = get_package_share_directory("nav2_minimal_tb3_sim")

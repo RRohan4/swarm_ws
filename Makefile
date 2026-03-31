@@ -1,4 +1,4 @@
-.PHONY: help up down build rebuild logs single test record
+.PHONY: help up down build rebuild logs single test record benchmark
 
 # Show available targets (default)
 help:
@@ -15,6 +15,10 @@ help:
 	@echo "            Pass FOXGLOVE=1 to also start the Foxglove bridge"
 	@echo "            Pass EXPLORE=N to stop at N% exploration (e.g. make record EXPLORE=60)"
 	@echo "            Pass TIMEOUT=N to stop after N seconds (e.g. make record TIMEOUT=300)"
+	@echo "  benchmark Measure time-to-80%-exploration for 1-4 robots (headless, uncapped)"
+	@echo "            Pass ROBOTS=\"1 2 3 4\" to select robot counts  (default: all four)"
+	@echo "            Pass RUNS=N for multiple repetitions per count (default: 1)"
+	@echo "            Pass TARGET=N for a different % threshold       (default: 80)"
 
 up:
 	docker compose up
@@ -46,3 +50,11 @@ export TIMEOUT_CUTOFF = $(or $(TIMEOUT),0)
 
 record:
 	docker compose -f compose.yaml -f compose.record.yaml $(_FOXGLOVE_PROFILE) up --build --abort-on-container-exit --exit-code-from recorder
+
+ROBOTS ?= 1 2 3 4
+RUNS ?= 1
+TARGET ?= 80
+export ROBOTS RUNS TARGET
+
+benchmark:
+	python3 scripts/benchmark_cli.py

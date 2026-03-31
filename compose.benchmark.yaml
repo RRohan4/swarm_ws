@@ -1,0 +1,50 @@
+# compose.benchmark.yaml — standalone compose for exploration benchmarking
+#
+# Runs the full swarm inside a single container via swarm.launch.py so that
+# NUM_ROBOTS can be varied without editing compose.yaml.  Gazebo runs uncapped
+# (GZ_REAL_TIME_FACTOR=0.0) to finish runs as fast as possible.
+#
+# Usage (driven by scripts/benchmark.sh):
+#   NUM_ROBOTS=2 docker compose -f compose.benchmark.yaml up \
+#       --build --abort-on-container-exit --exit-code-from measurer
+
+x-base: &base
+  build: .
+  network_mode: host
+  ipc: host
+  environment: &base-env
+    GZ_IP: "127.0.0.1"
+    ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
+    RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    CYCLONEDDS_URI: "<CycloneDDS><Domain><Discovery><MaxAutoParticipantIndex>200</MaxAutoParticipantIndex></Discovery></Domain></CycloneDDS>"
+
+services:
+  # ── Full swarm in one container (Gazebo + SLAM + Nav2 + FSM + global nodes) ──
+  sim:
+    <<: *base
+    environment:
+      <<: *base-env
+      GZ_REAL_TIME_FACTOR: "0.0" # uncapped — finish as fast as possible
+    volumes:
+      - /dev/shm:/dev/shm
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               ros2 launch swarm_bringup swarm.launch.py
+               num_robots:=${NUM_ROBOTS:-4}"
+
+  # ── Measurement node — exits when target % reached; drives --exit-code-from ──
+  measurer:
+    <<: *base
+    environment:
+      <<: *base-env
+      NUM_ROBOTS: "${NUM_ROBOTS:-4}"
+      EXPLORE_TARGET: "${EXPLORE_TARGET:-80.0}"
+      RESULTS_FILE: "/results/result.json"
+      SIM_TIMEOUT_S: "${SIM_TIMEOUT_S:-1800}"
+    volumes:
+      - /dev/shm:/dev/shm
+      - ./benchmark_results:/results
+    command: >
+      bash -c ". /ws/install/setup.sh &&
+               python3 /ws/scripts/measure_exploration.py"
+    depends_on: [sim]
