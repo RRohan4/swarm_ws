@@ -1,6 +1,6 @@
 # Coordinated Swarm Exploration with ROS 2
 
-ROS 2 workspace for multi-robot swarm exploration. Three TurtleBot3 Waffle robots autonomously explore a complex maze using decentralized frontier-based navigation. Gazebo sim runs headless and Foxglove provides the visualisation UI.
+ROS 2 workspace for multi-robot swarm exploration. Four TurtleBot3 Waffle robots autonomously explore a complex maze using decentralized frontier-based navigation. Gazebo sim runs headless and Foxglove provides the visualisation UI.
 
 Written in Python with ROS 2 Jazzy, the codebase includes SLAM, Nav2, a custom frontier detector, and a per-robot FSM. Robots coordinate via **geodesic Voronoi partitioning**: a simultaneous multi-source BFS divides the merged map so each robot owns the region it can reach fastest, then selects the nearest frontier within its partition. This eliminates duplicate work without any central coordinator. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for a full description.
 
