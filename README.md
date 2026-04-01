@@ -6,6 +6,9 @@ Written in Python with ROS 2 Jazzy, the codebase includes SLAM, Nav2, a custom f
 
 ![ezgif-5dca8da404a8c63b](https://github.com/user-attachments/assets/3e7e5409-2bfa-445c-80f0-fc237b1a7c50)
 
+<img width="821" height="479" alt="image" src="https://github.com/user-attachments/assets/75fd5db6-4c8b-443e-9051-d9d3e9c17868" />
+
+
 ## Dev flow overview
 
 | Step | Tool | Purpose |
