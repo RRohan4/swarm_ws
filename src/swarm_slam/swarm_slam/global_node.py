@@ -13,6 +13,7 @@ Parameters:
 """
 
 import math
+import multiprocessing
 import os
 
 import numpy as np
@@ -20,6 +21,7 @@ import rclpy
 from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Pose, PoseArray, TransformStamped
 from nav_msgs.msg import MapMetaData, OccupancyGrid, Odometry
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from std_msgs.msg import Float32, Header, String
@@ -54,9 +56,7 @@ class GlobalNode(Node):
         )
         rate: float = self.get_parameter("rate").get_parameter_value().double_value
         self._robot_clear_radius: float = (
-            self.get_parameter("robot_clear_radius")
-            .get_parameter_value()
-            .double_value
+            self.get_parameter("robot_clear_radius").get_parameter_value().double_value
         )
 
         self._robot_ids = robot_ids
@@ -172,8 +172,8 @@ class GlobalNode(Node):
             self._merged_pub.publish(merged)
             # Exploration % = known free area / total maze free area * 100
             data = np.array(merged.data, dtype=np.int8)
-            known_free_area_m2 = (
-                float(np.count_nonzero(data == 0)) * (merged.info.resolution**2)
+            known_free_area_m2 = float(np.count_nonzero(data == 0)) * (
+                merged.info.resolution**2
             )
             total_free_area_m2 = self._maze_total_free_area_m2
             pct = (
@@ -348,13 +348,28 @@ class GlobalNode(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = GlobalNode()
+
+    # Auto-detect thread count (1/2 available cores, minimum 2)
+    cpu_count = multiprocessing.cpu_count()
+    num_threads = max(2, cpu_count // 2)
+
+    executor = MultiThreadedExecutor(num_threads=num_threads)
+    executor.add_node(node)
+
     try:
-        rclpy.spin(node)
+        executor.spin()
     except KeyboardInterrupt:
-        pass
+        node.get_logger().info("KeyboardInterrupt received, shutting down...")
+    except Exception as e:
+        node.get_logger().error(f"Exception in executor: {e}")
     finally:
-        node.destroy_node()
-        rclpy.try_shutdown()
+        try:
+            executor.shutdown(wait_for_all_nodes=True)
+        except Exception as e:
+            node.get_logger().warning(f"Exception during executor shutdown: {e}")
+        finally:
+            node.destroy_node()
+            rclpy.try_shutdown()
 
 
 if __name__ == "__main__":

@@ -12,11 +12,27 @@ x-base: &base
   build: .
   network_mode: host
   ipc: host
+  # ── Resource constraints for multi-threaded scaling ──
+  cpus: "6" # Give benchmark full power for fast completion
+  mem_limit: 4g
   environment: &base-env
     GZ_IP: "127.0.0.1"
     ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
     RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
     CYCLONEDDS_URI: "<CycloneDDS><Domain><Discovery><MaxAutoParticipantIndex>200</MaxAutoParticipantIndex></Discovery></Domain></CycloneDDS>"
+    # ── Thread pool & GPU optimization ──
+    OMP_NUM_THREADS: "6"
+    MKL_NUM_THREADS: "6"
+    NUMEXPR_NUM_THREADS: "6"
+    VECLIB_MAXIMUM_THREADS: "6"
+    # ── Gazebo GPU & physics optimization ──
+    IGN_GAZEBO_PHYSICS_ENGINE_PATH: /usr/lib/x86_64-linux-gnu/gazebo-11/plugins
+    GZ_SIM_MAX_STEP_SIZE: "0.001"
+    GZ_SIM_RTOL: "0.0001"
+    GZ_PHYSICS_THREADS: "6"
+    GZ_SIM_PHYSICS_STEP_SIZE: "0.001"
+    # Headless rendering without GPU not needed for benchmarks
+    DISPLAY: ""
 
 services:
   # ── Full swarm in one container (Gazebo + SLAM + Nav2 + FSM + global nodes) ──
@@ -25,6 +41,10 @@ services:
     environment:
       <<: *base-env
       GZ_REAL_TIME_FACTOR: "0.0" # uncapped — finish as fast as possible
+      OMP_NUM_THREADS: "6"
+      MKL_NUM_THREADS: "6"
+      NUMEXPR_NUM_THREADS: "6"
+      GZ_PHYSICS_THREADS: "6"
     volumes:
       - /dev/shm:/dev/shm
     command: >
@@ -34,12 +54,17 @@ services:
   # ── Measurement node — exits when target % reached; drives --exit-code-from ──
   measurer:
     <<: *base
+    cpus: "2" # Measurement is lightweight
+    mem_limit: 1g
     environment:
       <<: *base-env
       NUM_ROBOTS: "${NUM_ROBOTS:-4}"
       EXPLORE_TARGET: "${EXPLORE_TARGET:-80.0}"
       RESULTS_FILE: "/results/result.json"
       SIM_TIMEOUT_S: "${SIM_TIMEOUT_S:-1800}"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      NUMEXPR_NUM_THREADS: "2"
     volumes:
       - /dev/shm:/dev/shm
       - ./benchmark_results:/results

@@ -33,6 +33,7 @@ Parameters:
 """
 
 import math
+import multiprocessing
 from collections import deque
 
 import numpy as np
@@ -41,6 +42,7 @@ from geometry_msgs.msg import Point, PoseArray, PoseStamped
 from nav2_msgs.action import NavigateToPose
 from nav_msgs.msg import OccupancyGrid
 from rclpy.action import ActionClient
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from std_msgs.msg import ColorRGBA, Header, String
@@ -732,13 +734,29 @@ def _dist(a: Point, b: Point) -> float:
 def main(args=None):
     rclpy.init(args=args)
     node = RobotFSMNode()
+
+    # Auto-detect thread count (1/2 available cores, minimum 2)
+    # Per-robot FSM can handle concurrent goal/frontier updates
+    cpu_count = multiprocessing.cpu_count()
+    num_threads = max(2, cpu_count // 2)
+
+    executor = MultiThreadedExecutor(num_threads=num_threads)
+    executor.add_node(node)
+
     try:
-        rclpy.spin(node)
+        executor.spin()
     except KeyboardInterrupt:
-        pass
+        node.get_logger().info("KeyboardInterrupt received, shutting down...")
+    except Exception as e:
+        node.get_logger().error(f"Exception in executor: {e}")
     finally:
-        node.destroy_node()
-        rclpy.try_shutdown()
+        try:
+            executor.shutdown(wait_for_all_nodes=True)
+        except Exception as e:
+            node.get_logger().warning(f"Exception during executor shutdown: {e}")
+        finally:
+            node.destroy_node()
+            rclpy.try_shutdown()
 
 
 if __name__ == "__main__":

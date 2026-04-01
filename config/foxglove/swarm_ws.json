@@ -3,25 +3,14 @@
     "3D!4hdne1a": {
       "cameraState": {
         "perspective": false,
-        "distance": 43.169390435251835,
+        "distance": 28.63945562104761,
         "phi": 0.00005729832627056611,
-        "thetaOffset": 48.377354263484946,
+        "thetaOffset": 89.97881022630023,
         "targetOffset": [
-          -0.4239988840536912,
-          2.7569932652838003,
-          -7.855410856242851e-23
+          0.878586191744715, -0.17336617244080707, -5.756235287550665e-23
         ],
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "fovy": 45,
         "near": 0.5,
         "far": 5000
@@ -332,11 +321,7 @@
           "type": "arrow",
           "showCovariance": false,
           "color": "#c1b041ff",
-          "arrowScale": [
-            0.479,
-            0.098,
-            1.364
-          ]
+          "arrowScale": [0.479, 0.098, 1.364]
         },
         "/robot_0/goal_markers": {
           "visible": true,
@@ -396,11 +381,7 @@
           "visible": true,
           "type": "arrow",
           "color": "#c1b041ff",
-          "arrowScale": [
-            0.479,
-            0.098,
-            1.364
-          ],
+          "arrowScale": [0.479, 0.098, 1.364],
           "showCovariance": false
         },
         "/robot_1/goal_markers": {
@@ -448,11 +429,7 @@
         "/robot_2/pose": {
           "visible": true,
           "type": "arrow",
-          "arrowScale": [
-            0.479,
-            0.098,
-            1.364
-          ],
+          "arrowScale": [0.479, 0.098, 1.364],
           "color": "#c1b041ff"
         },
         "/robot_2/goal_markers": {
@@ -488,11 +465,7 @@
         "/robot_3/pose": {
           "visible": true,
           "type": "arrow",
-          "arrowScale": [
-            0.479,
-            0.098,
-            1.364
-          ],
+          "arrowScale": [0.479, 0.098, 1.364],
           "color": "#c1b041ff"
         },
         "/robot_3/goal_markers": {
@@ -522,11 +495,7 @@
         "/robot_4/pose": {
           "visible": true,
           "type": "arrow",
-          "arrowScale": [
-            0.479,
-            0.098,
-            1.364
-          ],
+          "arrowScale": [0.479, 0.098, 1.364],
           "color": "#c1b041ff"
         },
         "/robot_4/goal_markers": {
@@ -556,11 +525,7 @@
         "/robot_5/pose": {
           "visible": true,
           "type": "arrow",
-          "arrowScale": [
-            0.479,
-            0.098,
-            1.364
-          ],
+          "arrowScale": [0.479, 0.098, 1.364],
           "color": "#c1b041ff"
         },
         "/robot_5/goal_markers": {
@@ -598,16 +563,8 @@
           "divisions": 10,
           "lineWidth": 1,
           "color": "#248eff",
-          "position": [
-            0,
-            0,
-            0
-          ],
-          "rotation": [
-            0,
-            0,
-            0
-          ]
+          "position": [0, 0, 0],
+          "rotation": [0, 0, 0]
         }
       },
       "publish": {
@@ -623,16 +580,13 @@
       "imageMode": {}
     },
     "Gauge!2tcosw5": {
-      "path": "/exploration_progress.data",
+      "path": "/exploration_pct.data",
       "style": "bar",
       "minValue": 0,
       "maxValue": 100,
       "colorMap": "red-yellow-green",
       "colorMode": "gradient",
-      "gradient": [
-        "#0000ff",
-        "#ff00ff"
-      ],
+      "gradient": ["#0000ff", "#ff00ff"],
       "reverse": false,
       "reverseDirection": false,
       "foxglovePanelTitle": ""
@@ -662,22 +616,9 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOffset": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -708,22 +649,9 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOffset": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -754,22 +682,9 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOffset": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -800,22 +715,9 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOffset": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -846,22 +748,9 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOffset": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -892,22 +781,9 @@
         "distance": 20,
         "perspective": true,
         "phi": 60,
-        "target": [
-          0,
-          0,
-          0
-        ],
-        "targetOffset": [
-          0,
-          0,
-          0
-        ],
-        "targetOrientation": [
-          0,
-          0,
-          0,
-          1
-        ],
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
         "thetaOffset": 60,
         "fovy": 45,
         "near": 0.5,
@@ -937,7 +813,7 @@
           "splitPercentage": 98
         },
         "direction": "row",
-        "splitPercentage": 48.77102199223805
+        "splitPercentage": 49.367175018635166
       },
       "second": {
         "first": "Image!49o3yx6",
@@ -947,7 +823,8 @@
           "direction": "row",
           "splitPercentage": 98
         },
-        "direction": "row"
+        "direction": "row",
+        "splitPercentage": 49.536515570412284
       },
       "direction": "column",
       "splitPercentage": 47.21805860970246

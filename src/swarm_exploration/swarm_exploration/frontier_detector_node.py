@@ -14,10 +14,13 @@ Parameters:
   min_unknown_backing: int    minimum unique unknown neighbours per cluster (default 4)
 """
 
+import multiprocessing
+
 import numpy as np
 import rclpy
 from geometry_msgs.msg import Point
 from nav_msgs.msg import OccupancyGrid
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from scipy import ndimage
@@ -249,13 +252,29 @@ class FrontierDetectorNode(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = FrontierDetectorNode()
+
+    # Auto-detect thread count (1/2 available cores, minimum 2)
+    # Frontier detection uses scipy ndimage which benefits from parallelism
+    cpu_count = multiprocessing.cpu_count()
+    num_threads = max(2, cpu_count // 2)
+
+    executor = MultiThreadedExecutor(num_threads=num_threads)
+    executor.add_node(node)
+
     try:
-        rclpy.spin(node)
+        executor.spin()
     except KeyboardInterrupt:
-        pass
+        node.get_logger().info("KeyboardInterrupt received, shutting down...")
+    except Exception as e:
+        node.get_logger().error(f"Exception in executor: {e}")
     finally:
-        node.destroy_node()
-        rclpy.try_shutdown()
+        try:
+            executor.shutdown(wait_for_all_nodes=True)
+        except Exception as e:
+            node.get_logger().warning(f"Exception during executor shutdown: {e}")
+        finally:
+            node.destroy_node()
+            rclpy.try_shutdown()
 
 
 if __name__ == "__main__":

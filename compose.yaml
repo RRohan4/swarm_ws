@@ -2,12 +2,26 @@ x-base: &base
   build: .
   network_mode: host
   ipc: host
+  # ── Resource constraints for multi-threaded scaling ──
+  cpus: "4"
+  mem_limit: 2g
   environment: &base-env
     GZ_IP: "127.0.0.1"
     ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
     RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
     # Raise MaxAutoParticipantIndex to 200 to give ample headroom.
     CYCLONEDDS_URI: "<CycloneDDS><Domain><Discovery><MaxAutoParticipantIndex>200</MaxAutoParticipantIndex></Discovery></Domain></CycloneDDS>"
+    # ── Thread pool & GPU optimization ──
+    OMP_NUM_THREADS: "4"
+    MKL_NUM_THREADS: "4"
+    NUMEXPR_NUM_THREADS: "4"
+    VECLIB_MAXIMUM_THREADS: "4"
+    # ── Gazebo GPU & physics optimization ──
+    IGN_GAZEBO_PHYSICS_ENGINE_PATH: /usr/lib/x86_64-linux-gnu/gazebo-11/plugins
+    GZ_SIM_MAX_STEP_SIZE: "0.001"
+    GZ_SIM_RTOL: "0.0001"
+    # Enable headless GPU rendering (if GPU available)
+    GZ_RENDER_ENGINE: ogre2
   volumes:
     - /dev/shm:/dev/shm
 
@@ -15,11 +29,20 @@ services:
   # ── Gazebo + clock bridge ─────────────────────────────────────────────────────
   sim:
     <<: *base
+    cpus: "6" # Gazebo physics + rendering intensive
+    mem_limit: 3g
     environment:
       <<: *base-env
       DISPLAY: ${DISPLAY:-:0}
       QT_X11_NO_MITSHM: "1"
       GZ_REAL_TIME_FACTOR: "1.0"
+      OMP_NUM_THREADS: "6"
+      MKL_NUM_THREADS: "6"
+      NUMEXPR_NUM_THREADS: "6"
+      # Gazebo Multi-threaded physics engine
+      GZ_PHYSICS_THREADS: "6"
+      GZ_SIM_PHYSICS_STEP_SIZE: "0.001"
+      GZ_SIM_MAX_CONTACTS_TO_REPORT: "50"
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/shm:/dev/shm
@@ -30,6 +53,8 @@ services:
   # ── Robot stacks — to add a robot: copy a block, increment id and position ───
   robot_0:
     <<: *base
+    cpus: "2"
+    mem_limit: 1g
     environment:
       <<: *base-env
       SWARM_ROBOT_ID: robot_0
@@ -43,6 +68,8 @@ services:
 
   robot_1:
     <<: *base
+    cpus: "2"
+    mem_limit: 1g
     environment:
       <<: *base-env
       SWARM_ROBOT_ID: robot_1
@@ -56,6 +83,8 @@ services:
 
   robot_2:
     <<: *base
+    cpus: "2"
+    mem_limit: 1g
     environment:
       <<: *base-env
       SWARM_ROBOT_ID: robot_2
@@ -69,6 +98,8 @@ services:
 
   robot_3:
     <<: *base
+    cpus: "2"
+    mem_limit: 1g
     environment:
       <<: *base-env
       SWARM_ROBOT_ID: robot_3
@@ -84,6 +115,9 @@ services:
   # To add a robot: update robot_ids and add it to depends_on
   global:
     <<: *base
+    cpus: "2"
+    mem_limit: 2g
+    environment: *base-env
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 launch swarm_bringup global.launch.py robot_ids:=robot_0,robot_1,robot_2,robot_3"
@@ -106,6 +140,7 @@ services:
   # ── Foxglove bridge ───────────────────────────────────────────────────────────
   foxglove:
     <<: *base
+    environment: *base-env
     command: >
       bash -c ". /ws/install/setup.sh &&
                ros2 run foxglove_bridge foxglove_bridge

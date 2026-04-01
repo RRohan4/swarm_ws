@@ -9,6 +9,7 @@ Args:
   yaw       : spawn yaw in radians (default 0)
 """
 
+import multiprocessing
 import os
 import tempfile
 
@@ -28,6 +29,12 @@ from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration
 from launch_ros.actions import Node, PushRosNamespace
+
+
+def _get_thread_count() -> int:
+    """Get optimal thread count (1/2 available CPU cores, minimum 2)."""
+    cpu_count = multiprocessing.cpu_count()
+    return max(2, cpu_count // 2)
 
 
 def _write_bridge_config(robot_id: str) -> str:
@@ -332,6 +339,7 @@ def launch_setup(context, *args, **kwargs):
                     # ── robot_fsm_node (Phase 5) ───────────────────────────────
                     # Starts alongside Nav2; its action client waits internally
                     # for the NavigateToPose server to become available.
+                    # Multi-threaded for concurrent goal/frontier handling
                     Node(
                         package="swarm_exploration",
                         executable="robot_fsm_node",
@@ -342,9 +350,11 @@ def launch_setup(context, *args, **kwargs):
                                 "robot_id": robot_id,
                                 "status_rate": 2.0,
                                 "goal_timeout": 60.0,
+                                "_thread_count": _get_thread_count(),
                             }
                         ],
                         output="screen",
+                        emulate_tty=True,
                     ),
                 ],
             )

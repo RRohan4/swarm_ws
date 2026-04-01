@@ -22,10 +22,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-rmw-cyclonedds-cpp \
     gz-harmonic \
     python3-pip \
+    libomp-dev \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Python deps for swarm nodes
-RUN pip3 install --no-cache-dir --break-system-packages numpy scipy
+# Python deps for swarm nodes + optimization libraries
+# numba: JIT compilation for scipy operations
+# psutil: CPU/memory monitoring and thread-aware configuration
+RUN pip3 install --no-cache-dir --break-system-packages \
+    numpy scipy numba psutil
 
 WORKDIR /ws
 

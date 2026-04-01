@@ -9,6 +9,7 @@ Args:
   num_robots : number of robots to spawn (default: 2)
 """
 
+import multiprocessing
 import os
 import re
 import tempfile
@@ -27,6 +28,12 @@ from launch.actions import (
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+
+
+def _get_thread_count() -> int:
+    """Get optimal thread count (1/2 available CPU cores, minimum 2)."""
+    cpu_count = multiprocessing.cpu_count()
+    return max(2, cpu_count // 2)
 
 
 def _patched_world(source_sdf: str, rtf: float) -> str:
@@ -139,6 +146,8 @@ def launch_setup(context, *args, **kwargs):
                         }
                     ],
                     output="screen",
+                    # Enable multi-threaded execution for concurrent map subscriptions
+                    emulate_tty=True,
                 ),
             ],
         )
@@ -161,6 +170,8 @@ def launch_setup(context, *args, **kwargs):
                         }
                     ],
                     output="screen",
+                    # Enable multi-threaded execution for concurrent sensor processing
+                    emulate_tty=True,
                 ),
             ],
         )
